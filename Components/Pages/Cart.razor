@@ -10,7 +10,7 @@
 @implements IDisposable
 @rendermode InteractiveServer
 
-<PageTitle>Carrito de Compras - Venta Yenny y Gonzalo</PageTitle>
+<PageTitle>Carrito de Compras - Venta Gonza y Yenny</PageTitle>
 
 <div class="max-w-4xl mx-auto">
     <h1 class="text-3xl font-bold text-gray-900 mb-8">🛒 Carrito de Compras</h1>
@@ -25,7 +25,7 @@
             <h2 class="text-xl font-medium text-gray-900 mb-2">Tu carrito está vacío</h2>
             <p class="text-gray-600 mb-6">¿Por qué no echas un vistazo a nuestros increíbles productos?</p>
             <button @onclick="GoToCatalog" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                 Explorar Catálogo
             </button>
         </div>
@@ -55,7 +55,7 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-medium text-gray-900 truncate">@cartItem.Item.Title</h3>
                                     <p class="text-sm text-gray-500 truncate">@cartItem.Item.Category?.Name</p>
-                                    <p class="text-lg font-semibold text-green-600">$@cartItem.Item.Price.ToString("F2")</p>
+                                    <p class="text-lg font-semibold text-gray-800">$@cartItem.Item.Price.ToString("F2")</p>
                                 </div>
                                 
                                 <!-- Controles de cantidad y eliminación -->
@@ -98,7 +98,7 @@
                         <div class="border-t pt-3">
                             <div class="flex justify-between font-semibold text-lg">
                                 <span>Total:</span>
-                                <span class="text-green-600">$@GetSubtotal().ToString("F2")</span>
+                                <span class="text-gray-800">$@GetSubtotal().ToString("F2")</span>
                             </div>
                         </div>
                     </div>
