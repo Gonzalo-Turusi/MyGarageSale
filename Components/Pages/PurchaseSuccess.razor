@@ -1,0 +1,69 @@
+@page "/purchase-success"
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Compra Exitosa - Venta Yenny y Gonzalo</PageTitle>
+
+<div class="max-w-2xl mx-auto text-center py-16">
+    <!-- Icono de éxito -->
+    <div class="mb-8">
+        <div class="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+    </div>
+    
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">¡Pedido Recibido!</h1>
+    
+    <p class="text-lg text-gray-600 mb-8">
+        Gracias por tu pedido. Hemos recibido tu solicitud de compra exitosamente.
+    </p>
+    
+    <!-- Información sobre próximos pasos -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left mb-8">
+        <h2 class="text-lg font-semibold text-blue-900 mb-3">📞 Próximos pasos:</h2>
+        <ul class="space-y-2 text-blue-800">
+            <li class="flex items-start gap-2">
+                <span class="text-blue-600">1.</span>
+                <span>Revisaremos tu pedido y nos pondremos en contacto contigo por email</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="text-blue-600">2.</span>
+                <span>Coordinaremos la forma de pago y el método de entrega</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="text-blue-600">3.</span>
+                <span>Una vez confirmado el pago, procederemos con la entrega</span>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Información de contacto -->
+    <div class="bg-gray-50 border rounded-lg p-6 text-left mb-8">
+        <h3 class="font-semibold text-gray-900 mb-2">💬 ¿Necesitas ayuda?</h3>
+        <p class="text-gray-600 text-sm">
+            Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos. 
+            Responderemos a la brevedad posible.
+        </p>
+    </div>
+    
+    <!-- Botón de acción -->
+    <div class="flex justify-center mt-12">
+        <button @onclick="GoToHome" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-lg font-medium text-lg transition-colors flex items-center gap-3 shadow-lg hover:shadow-xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            Volver al Inicio
+        </button>
+    </div>
+</div>
+
+@code {
+    private void GoToHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+} 

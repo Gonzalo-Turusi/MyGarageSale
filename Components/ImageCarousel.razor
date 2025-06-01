@@ -1,0 +1,384 @@
+@using MyGarageSale.Models
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<!-- Carrusel principal (tamaño fijo) -->
+<div class="embla" @ref="emblaElement">
+    <div class="embla__container">
+        @if (Images?.Any() == true)
+        {
+            @foreach (var image in Images)
+            {
+                <div class="embla__slide">
+                    <div class="embla__slide__img" @onclick="() => OpenModal(image)">
+                        <img src="@image.ImagePath" 
+                             alt="@(image.AltText ?? ItemTitle)" 
+                             class="carousel-image" />
+            </div>
+            </div>
+        }
+    }
+    else
+    {
+            <div class="embla__slide">
+                <div class="embla__slide__img no-image">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21,15 16,10 5,21"/>
+                </svg>
+                    <p>Sin imagen</p>
+                </div>
+            </div>
+        }
+        </div>
+    
+    @if (Images?.Count() > 1)
+    {
+        <button class="embla__prev" @onclick="PrevSlide">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+        </button>
+        <button class="embla__next" @onclick="NextSlide">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+        </button>
+    }
+</div>
+
+<!-- Modal para pantalla completa -->
+@if (showModal && selectedImage != null)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <button @onclick="CloseModal" class="modal-close">×</button>
+            
+            <!-- Navegación en modal si hay múltiples imágenes -->
+            @if (Images?.Count() > 1)
+            {
+                <button @onclick="PrevModalImage" class="modal-nav modal-nav-prev">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15,18 9,12 15,6"></polyline>
+                    </svg>
+                </button>
+                <button @onclick="NextModalImage" class="modal-nav modal-nav-next">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9,18 15,12 9,6"></polyline>
+                    </svg>
+                </button>
+            }
+            
+            <img src="@selectedImage.ImagePath" 
+                 alt="@(selectedImage.AltText ?? ItemTitle)" 
+                 class="modal-image" />
+                 
+            <!-- Indicador de imagen actual -->
+            @if (Images?.Count() > 1)
+            {
+                <div class="modal-indicator-container">
+                    <span class="modal-indicator-text">
+                        @(GetImageIndex(selectedImage) + 1) / @Images.Count()
+                    </span>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    .embla {
+        overflow: hidden;
+        width: 100%;
+        height: 400px;
+        position: relative;
+        background: #f3f4f6;
+        border-radius: 8px;
+    }
+    
+    .embla__container {
+        display: flex;
+        height: 100%;
+    }
+    
+    .embla__slide {
+        flex: 0 0 100%;
+        min-width: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .embla__slide__img {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    
+    .embla__slide__img.no-image {
+        flex-direction: column;
+        color: #6b7280;
+        gap: 8px;
+        cursor: default;
+    }
+    
+    .carousel-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        transition: transform 0.2s ease;
+    }
+    
+    .carousel-image:hover {
+        transform: scale(1.02);
+    }
+    
+    .embla__prev,
+    .embla__next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        z-index: 2;
+    }
+    
+    .embla__prev:hover,
+    .embla__next:hover {
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .embla__prev {
+        left: 12px;
+    }
+    
+    .embla__next {
+        right: 12px;
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        padding: 20px;
+    }
+    
+    .modal-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: -50px;
+        right: 0;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Navegación en modal */
+    .modal-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        z-index: 51;
+    }
+    
+    .modal-nav:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .modal-nav-prev {
+        left: 20px;
+    }
+    
+    .modal-nav-next {
+        right: 20px;
+    }
+    
+    .modal-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+    
+    /* Indicador de imagen en modal */
+    .modal-indicator-container {
+        position: absolute;
+        bottom: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+    
+    .modal-indicator-text {
+        font-weight: 500;
+    }
+</style>
+
+@code {
+    [Parameter] public IEnumerable<ItemImage>? Images { get; set; }
+    [Parameter] public string? ItemTitle { get; set; }
+    
+    private ElementReference emblaElement;
+    private IJSObjectReference? emblaCarousel;
+    private bool showModal = false;
+    private ItemImage? selectedImage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Images?.Count() > 1)
+        {
+            await InitializeCarousel();
+        }
+    }
+
+    private async Task InitializeCarousel()
+    {
+        try
+        {
+            // Inicializar con loop infinito habilitado
+            emblaCarousel = await JSRuntime.InvokeAsync<IJSObjectReference>("EmblaCarousel", emblaElement, new { 
+                loop = true,
+                align = "center"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing carousel: {ex.Message}");
+        }
+    }
+
+    private async Task PrevSlide()
+    {
+        if (emblaCarousel != null)
+        {
+            await emblaCarousel.InvokeVoidAsync("scrollPrev");
+        }
+    }
+
+    private async Task NextSlide()
+    {
+        if (emblaCarousel != null)
+        {
+            await emblaCarousel.InvokeVoidAsync("scrollNext");
+        }
+    }
+    
+    private void OpenModal(ItemImage image)
+    {
+        selectedImage = image;
+        showModal = true;
+        StateHasChanged();
+    }
+    
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedImage = null;
+        StateHasChanged();
+    }
+    
+    private void NextModalImage()
+    {
+        if (Images?.Any() == true && selectedImage != null)
+        {
+            var imagesList = Images.ToList();
+            var currentIndex = GetImageIndex(selectedImage);
+            var nextIndex = (currentIndex + 1) % imagesList.Count;
+            selectedImage = imagesList[nextIndex];
+            StateHasChanged();
+        }
+    }
+    
+    private void PrevModalImage()
+    {
+        if (Images?.Any() == true && selectedImage != null)
+        {
+            var imagesList = Images.ToList();
+            var currentIndex = GetImageIndex(selectedImage);
+            var prevIndex = currentIndex == 0 ? imagesList.Count - 1 : currentIndex - 1;
+            selectedImage = imagesList[prevIndex];
+            StateHasChanged();
+        }
+    }
+    
+    private int GetImageIndex(ItemImage image)
+    {
+        if (Images?.Any() == true)
+        {
+            var imagesList = Images.ToList();
+            return imagesList.FindIndex(img => img.Id == image.Id);
+        }
+        return 0;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (emblaCarousel != null)
+        {
+            try
+            {
+                await emblaCarousel.InvokeVoidAsync("destroy");
+                await emblaCarousel.DisposeAsync();
+            }
+            catch
+            {
+                // Ignore disposal errors
+            }
+        }
+    }
+} 

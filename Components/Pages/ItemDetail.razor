@@ -1,0 +1,195 @@
+@page "/item/{Id:int}"
+@using MyGarageSale.Models
+@using MyGarageSale.Services
+@using MyGarageSale.Components
+@inject IItemService ItemService
+@inject ICartService CartService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>@(item?.Title ?? "Artículo") - Venta Yenny y Gonzalo</PageTitle>
+
+@if (isLoading)
+{
+    <div class="flex justify-center items-center py-16">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-lg text-gray-600">Cargando artículo...</span>
+    </div>
+}
+else if (item == null)
+{
+    <div class="text-center py-16">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">Artículo no encontrado</h1>
+        <p class="text-gray-600 mb-6">El artículo que buscas no existe o ha sido eliminado.</p>
+        <button @onclick="GoToCatalog" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            Volver al Catálogo
+        </button>
+    </div>
+}
+else
+{
+    <div class="max-w-6xl mx-auto">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+            <ol class="flex items-center space-x-2 text-sm text-gray-500">
+                <li><a href="/" class="hover:text-blue-600">Inicio</a></li>
+                <li>/</li>
+                <li><span class="text-blue-600">@item.Category?.Name</span></li>
+                <li>/</li>
+                <li class="text-gray-900">@item.Title</li>
+            </ol>
+        </nav>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Carrusel de imágenes -->
+            <div class="space-y-4">
+                <ImageCarousel Images="@(item.Images?.ToList() ?? new List<ItemImage>())" 
+                              ItemTitle="@item.Title" />
+            </div>
+
+            <!-- Información del producto -->
+            <div class="space-y-6">
+                <!-- Título y categoría -->
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
+                            @item.Category?.Name
+                        </span>
+                        @if (item.IsSold)
+                        {
+                            <span class="inline-flex px-3 py-1 text-sm font-bold rounded-full bg-red-100 text-red-800">
+                                VENDIDO
+                            </span>
+                        }
+                    </div>
+                    <h1 class="text-3xl font-bold @(item.IsSold ? "text-gray-500" : "text-gray-900") mb-2">@item.Title</h1>
+                    <p class="text-sm text-gray-500">Publicado el @item.CreatedAt.ToString("dd/MM/yyyy")</p>
+                </div>
+
+                <!-- Precio -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex items-center gap-2">
+                        <span class="text-4xl font-bold @(item.IsSold ? "text-gray-400" : "text-green-600")">$@item.Price.ToString("F2")</span>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h3>
+                    <p class="@(item.IsSold ? "text-gray-400" : "text-gray-700") whitespace-pre-line">@item.Description</p>
+                </div>
+
+                <!-- Acciones -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex flex-col items-center space-y-3 max-w-sm mx-auto">
+                        @if (!item.IsSold)
+                        {
+                            @if (IsInCart)
+                            {
+                                <button @onclick="RemoveFromCart" 
+                                        class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Quitar del Carrito
+                                </button>
+                            }
+                            else
+                            {
+                                <button @onclick="AddToCart" 
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"></path>
+                                    </svg>
+                                    Agregar al Carrito
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <div class="w-full bg-gray-100 text-gray-500 py-3 px-6 rounded-lg font-medium text-center border border-gray-300">
+                                No disponible
+                            </div>
+                        }
+                        
+                        <button @onclick="GoToCatalog" 
+                                class="w-full bg-white hover:bg-gray-50 text-blue-600 border border-blue-600 py-2.5 px-6 rounded-lg font-medium transition-colors">
+                            Volver al Catálogo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    
+    private Item? item;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadItem();
+        CartService.OnCartUpdated += UpdateCartState;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadItem();
+    }
+
+    private async Task LoadItem()
+    {
+        isLoading = true;
+        try
+        {
+            item = await ItemService.GetItemByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading item: {ex.Message}");
+            item = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private bool IsInCart => item != null && CartService.IsItemInCart(item.Id);
+
+    private void UpdateCartState()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void AddToCart()
+    {
+        if (item != null && !item.IsSold)
+        {
+            CartService.AddToCart(item);
+        }
+    }
+
+    private void RemoveFromCart()
+    {
+        if (item != null)
+        {
+            CartService.RemoveFromCart(item.Id);
+        }
+    }
+
+    private void GoToCatalog()
+    {
+        Navigation.NavigateTo("/");
+    }
+    
+    public void Dispose()
+    {
+        CartService.OnCartUpdated -= UpdateCartState;
+    }
+} 

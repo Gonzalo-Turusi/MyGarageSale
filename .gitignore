@@ -404,3 +404,93 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# ===========================================
+# PROJECT SPECIFIC - MyGarageSale
+# ===========================================
+
+# Database files - SQLite databases contain sensitive user data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+garage_sale.db*
+
+# Configuration files with sensitive data
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json
+!appsettings.json
+
+# User uploaded files and images
+wwwroot/uploads/
+uploads/
+UserUploads/
+Images/Uploads/
+
+# Email configuration files (may contain SMTP passwords)
+emailconfig.json
+smtpconfig.json
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+*.temp
+*.temporary
+temp/
+tmp/
+
+# Log files specific to the application
+applicationlogs/
+logs/
+*.log.*
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE/Editor files
+*.swp
+*.swo
+*~
+
+# Deployment scripts (may contain sensitive info)
+deploy.sh
+deploy.bat
+deploy.ps1
+
+# Certificate files
+*.pfx
+*.p12
+*.p7b
+*.crt
+*.cer
+*.pem
+*.key
+
+# Connection strings backup
+connectionstrings.json
+secrets.json
+
+# CSS compilation artifacts
+wwwroot/css/tailwind.css.map
+wwwroot/css/site.css.map

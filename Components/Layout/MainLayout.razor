@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<div class="min-h-screen bg-gray-50">
+    <NavMenu />
+    
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        @Body
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-600">
+                <p>&copy; @DateTime.Now.Year Venta Yenny y Gonzalo. Encuentra las mejores ofertas en artículos usados.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet class="blazor-error-boundary">
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

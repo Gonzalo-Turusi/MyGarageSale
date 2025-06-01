@@ -1,0 +1,221 @@
+﻿@page "/"
+@page "/catalog"
+@using MyGarageSale.Models
+@using MyGarageSale.Services
+@inject IItemService ItemService
+@inject ICategoryService CategoryService
+@rendermode InteractiveServer
+
+<PageTitle>Venta Yenny y Gonzalo - Home</PageTitle>
+
+<!-- Hero section -->
+<div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8 mb-8">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold mb-4">¡Bienvenidos a la venta de Yenny y Gonza!</h1>
+        <p class="text-xl mb-6">Encuentra increíbles ofertas en artículos de segunda mano</p>
+        <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold">@availableItems.Count</span>
+                <span>artículos disponibles</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold">@soldItems.Count</span>
+                <span>artículos vendidos</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold">@categories.Count</span>
+                <span>categorías</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros principales -->
+<div class="mb-6">
+    <h2 class="text-2xl font-semibold mb-4">Filtrar artículos</h2>
+    <div class="flex flex-wrap gap-3 mb-4">
+        <button @onclick="() => SetAvailabilityFilter(true)" 
+                class="@GetAvailabilityButtonClass(true)">
+            ✅ Disponibles (@availableItems.Count)
+        </button>
+        
+        <button @onclick="() => SetAvailabilityFilter(false)" 
+                class="@GetAvailabilityButtonClass(false)">
+            🏷️ Todos (@allItems.Count)
+        </button>
+    </div>
+</div>
+
+<!-- Filtros de categoría -->
+<div class="mb-8">
+    <h3 class="text-lg font-semibold mb-3">Por categoría</h3>
+    <div class="flex flex-wrap gap-3">
+        <button @onclick="() => FilterByCategory(null)" 
+                class="@GetCategoryButtonClass(null)">
+            📂 Todas las categorías
+        </button>
+        
+        @foreach (var category in categories)
+        {
+            var categoryItemCount = GetCategoryItemCount(category.Id);
+            <button @onclick="() => FilterByCategory(category.Id)" 
+                    class="@GetCategoryButtonClass(category.Id)">
+                @category.Name (@categoryItemCount)
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Línea divisoria -->
+<div class="border-t border-gray-200 mb-8"></div>
+
+<!-- Estado de carga -->
+@if (isLoading)
+{
+    <div class="flex justify-center items-center py-16">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-lg text-gray-600">Cargando artículos...</span>
+    </div>
+}
+else if (!filteredItems.Any())
+{
+    <!-- Mensaje cuando no hay artículos -->
+    <div class="text-center py-16">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H9a1 1 0 00-1 1v1m8 0V4a1 1 0 00-1-1H8a1 1 0 00-1 1v1m0 0v4"></path>
+        </svg>
+        <h3 class="text-xl font-medium text-gray-900 mb-2">No hay artículos disponibles</h3>
+        <p class="text-gray-600">
+            @if (selectedCategoryId.HasValue)
+            {
+                <span>No hay artículos en esta categoría en este momento.</span>
+            }
+            else
+            {
+                <span>Pronto agregaremos artículos increíbles a nuestro catálogo.</span>
+            }
+        </p>
+    </div>
+}
+else
+{
+    <!-- Grid de artículos -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @foreach (var item in filteredItems)
+        {
+            <ItemCard Item="item" />
+        }
+    </div>
+}
+
+@code {
+    private List<Item> allItems = new();
+    private List<Item> availableItems = new();
+    private List<Item> soldItems = new();
+    private List<Item> filteredItems = new();
+    private List<Category> categories = new();
+    private int? selectedCategoryId = null;
+    private bool showOnlyAvailable = true; // Por defecto mostrar solo disponibles
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        
+        try
+        {
+            // Cargar datos en paralelo para mejor rendimiento
+            var allItemsTask = ItemService.GetAllItemsAsync();
+            var categoriesTask = CategoryService.GetAllCategoriesAsync();
+
+            await Task.WhenAll(allItemsTask, categoriesTask);
+
+            allItems = await allItemsTask;
+            availableItems = allItems.Where(i => !i.IsSold).ToList();
+            soldItems = allItems.Where(i => i.IsSold).ToList();
+            categories = await categoriesTask;
+            
+            // Aplicar filtros por defecto (solo disponibles)
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            // En un entorno de producción, esto iría a un servicio de logging
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            allItems = new List<Item>();
+            availableItems = new List<Item>();
+            soldItems = new List<Item>();
+            categories = new List<Category>();
+            filteredItems = new List<Item>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SetAvailabilityFilter(bool onlyAvailable)
+    {
+        showOnlyAvailable = onlyAvailable;
+        ApplyFilters();
+    }
+
+    private void FilterByCategory(int? categoryId)
+    {
+        selectedCategoryId = categoryId;
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        // Primer filtro: disponibilidad
+        var itemsToFilter = showOnlyAvailable ? availableItems : allItems;
+        
+        // Segundo filtro: categoría
+        if (selectedCategoryId.HasValue)
+        {
+            filteredItems = itemsToFilter.Where(i => i.CategoryId == selectedCategoryId.Value).ToList();
+        }
+        else
+        {
+            filteredItems = itemsToFilter.ToList();
+        }
+        
+        StateHasChanged();
+    }
+
+    private int GetCategoryItemCount(int categoryId)
+    {
+        var itemsToCount = showOnlyAvailable ? availableItems : allItems;
+        return itemsToCount.Count(i => i.CategoryId == categoryId);
+    }
+
+    private string GetAvailabilityButtonClass(bool onlyAvailable)
+    {
+        var baseClasses = "px-4 py-2 rounded-lg font-medium transition-colors duration-200";
+        
+        if (showOnlyAvailable == onlyAvailable)
+        {
+            return $"{baseClasses} bg-blue-600 text-white";
+        }
+        
+        return $"{baseClasses} bg-white text-blue-600 border border-blue-600 hover:bg-blue-50";
+    }
+
+    private string GetCategoryButtonClass(int? categoryId)
+    {
+        var baseClasses = "px-4 py-2 rounded-lg font-medium transition-colors duration-200";
+        
+        if (selectedCategoryId == categoryId)
+        {
+            return $"{baseClasses} bg-green-600 text-white";
+        }
+        
+        return $"{baseClasses} bg-white text-green-600 border border-green-600 hover:bg-green-50";
+    }
+}

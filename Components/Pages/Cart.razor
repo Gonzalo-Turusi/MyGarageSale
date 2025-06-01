@@ -1,0 +1,327 @@
+@page "/cart"
+@using MyGarageSale.Models
+@using MyGarageSale.Services
+@using MyGarageSale.Components
+@using System.ComponentModel.DataAnnotations
+@inject ICartService CartService
+@inject IPurchaseRequestService PurchaseRequestService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+@rendermode InteractiveServer
+
+<PageTitle>Carrito de Compras - Venta Yenny y Gonzalo</PageTitle>
+
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">🛒 Carrito de Compras</h1>
+
+    @if (!cartItems.Any())
+    {
+        <!-- Carrito vacío -->
+        <div class="text-center py-16">
+            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"></path>
+            </svg>
+            <h2 class="text-xl font-medium text-gray-900 mb-2">Tu carrito está vacío</h2>
+            <p class="text-gray-600 mb-6">¿Por qué no echas un vistazo a nuestros increíbles productos?</p>
+            <button @onclick="GoToCatalog" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                Explorar Catálogo
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Lista de artículos -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold">Artículos en tu carrito (@cartItems.Count)</h2>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-200">
+                        @foreach (var cartItem in cartItems)
+                        {
+                            <div class="p-6 flex items-center gap-4">
+                                <!-- Imagen del producto -->
+                                <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                                    <img src="@GetImagePath(cartItem.Item)" 
+                                         alt="@cartItem.Item.Title" 
+                                         class="w-full h-full object-cover" />
+                                </div>
+                                
+                                <!-- Información del producto -->
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium text-gray-900 truncate">@cartItem.Item.Title</h3>
+                                    <p class="text-sm text-gray-500 truncate">@cartItem.Item.Category?.Name</p>
+                                    <p class="text-lg font-semibold text-green-600">$@cartItem.Item.Price.ToString("F2")</p>
+                                </div>
+                                
+                                <!-- Controles de cantidad y eliminación -->
+                                <div class="flex items-center gap-3">
+                                    <!-- Mensaje para garage sale -->
+                                    <div class="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-lg">
+                                        <span class="text-sm text-blue-700 font-medium">Cantidad: 1</span>
+                                        <span class="text-xs text-blue-600">(único)</span>
+                                    </div>
+                                    
+                                    <button @onclick="() => ShowDeleteConfirmation(cartItem.Item)" 
+                                            class="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors group"
+                                            title="Eliminar del carrito">
+                                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen y checkout -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+                    <h2 class="text-lg font-semibold mb-4">Resumen del pedido</h2>
+                    
+                    <!-- Desglose de precios -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span>Subtotal (@GetTotalItems() artículos):</span>
+                            <span>$@GetSubtotal().ToString("F2")</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Envío:</span>
+                            <span>A coordinar</span>
+                        </div>
+                        <div class="border-t pt-3">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Total:</span>
+                                <span class="text-green-600">$@GetSubtotal().ToString("F2")</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario de compra -->
+                    <EditForm Model="purchaseForm" OnValidSubmit="ProcessPurchase" class="space-y-4">
+                        <DataAnnotationsValidator />
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                            <InputText @bind-Value="purchaseForm.CustomerName" 
+                                      class="form-control" 
+                                      placeholder="Tu nombre completo" />
+                            <ValidationMessage For="() => purchaseForm.CustomerName" class="validation-message" />
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <InputText @bind-Value="purchaseForm.CustomerEmail" 
+                                      class="form-control" 
+                                      placeholder="tu@email.com" />
+                            <ValidationMessage For="() => purchaseForm.CustomerEmail" class="validation-message" />
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios (opcional)</label>
+                            <InputTextArea @bind-Value="purchaseForm.Comments" 
+                                          class="form-control" 
+                                          rows="3" 
+                                          placeholder="Información adicional sobre tu pedido..." />
+                            
+                            <!-- Mensaje informativo sobre comentarios -->
+                            <div class="mt-2 text-xs text-gray-500">
+                                <p>💬 ¿Tienes preguntas sobre algún artículo? ¡Escríbenos aquí! Te responderemos cuando confirmemos tu pedido.</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" 
+                                disabled="@isProcessing"
+                                class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                            @if (isProcessing)
+                            {
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <span>Procesando...</span>
+                            }
+                            else
+                            {
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Realizar Pedido</span>
+                            }
+                        </button>
+                    </EditForm>
+                    
+                    <div class="mt-4 text-xs text-gray-500 text-center">
+                        <p>Al realizar el pedido, nos pondremos en contacto contigo para coordinar el pago y la entrega.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal de confirmación -->
+<ConfirmDeleteModal IsVisible="showDeleteModal" 
+                   ItemTitle="@itemToDelete?.Title" 
+                   OnConfirm="ConfirmDelete" 
+                   OnCancel="CancelDelete" />
+
+@code {
+    private List<CartItem> cartItems = new();
+    private PurchaseRequestForm purchaseForm = new();
+    private bool isProcessing = false;
+    
+    // Variables para el modal de confirmación
+    private bool showDeleteModal = false;
+    private Item? itemToDelete = null;
+
+    public class PurchaseRequestForm
+    {
+        [Required(ErrorMessage = "El nombre es requerido")]
+        [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
+        public string CustomerName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El email es requerido")]
+        [EmailAddress(ErrorMessage = "Formato de email inválido")]
+        public string CustomerEmail { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "Los comentarios no pueden exceder 500 caracteres")]
+        public string? Comments { get; set; }
+    }
+
+    protected override void OnInitialized()
+    {
+        CartService.OnCartUpdated += UpdateCartItems;
+        UpdateCartItems();
+    }
+
+    private void UpdateCartItems()
+    {
+        cartItems = CartService.GetCartItems();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetImagePath(Item item)
+    {
+        // Prioridad: 1) Imagen principal de la colección, 2) ImagePath legacy, 3) placeholder
+        var mainImage = item.MainImagePath;
+        
+        if (string.IsNullOrEmpty(mainImage))
+            return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=Sin+Imagen";
+            
+        if (!mainImage.StartsWith("http") && !mainImage.StartsWith("/"))
+            return $"/uploads/{mainImage}";
+            
+        return mainImage;
+    }
+
+    private void ShowDeleteConfirmation(Item item)
+    {
+        itemToDelete = item;
+        showDeleteModal = true;
+    }
+
+    private void ConfirmDelete()
+    {
+        if (itemToDelete != null)
+        {
+            CartService.RemoveFromCart(itemToDelete.Id);
+            showDeleteModal = false;
+            itemToDelete = null;
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteModal = false;
+        itemToDelete = null;
+    }
+
+    private void UpdateQuantity(int itemId, int newQuantity)
+    {
+        var cartItem = cartItems.FirstOrDefault(c => c.Item.Id == itemId);
+        if (cartItem != null)
+        {
+            if (newQuantity <= 0)
+            {
+                CartService.RemoveFromCart(itemId);
+            }
+            else
+            {
+                CartService.UpdateQuantity(itemId, newQuantity);
+            }
+        }
+    }
+
+    private void RemoveFromCart(int itemId)
+    {
+        CartService.RemoveFromCart(itemId);
+    }
+
+    private int GetTotalItems()
+    {
+        return cartItems.Sum(c => c.Quantity);
+    }
+
+    private decimal GetSubtotal()
+    {
+        return cartItems.Sum(c => c.Item.Price * c.Quantity);
+    }
+
+    private void GoToCatalog()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task ProcessPurchase()
+    {
+        if (isProcessing || !cartItems.Any())
+            return;
+
+        isProcessing = true;
+
+        try
+        {
+            var purchaseRequest = new PurchaseRequest
+            {
+                CustomerName = purchaseForm.CustomerName,
+                CustomerEmail = purchaseForm.CustomerEmail,
+                Comments = purchaseForm.Comments,
+                CreatedAt = DateTime.UtcNow,
+                IsProcessed = false
+            };
+
+            var purchaseRequestItems = cartItems.Select(c => new PurchaseRequestItem
+            {
+                ItemId = c.Item.Id,
+                Quantity = c.Quantity
+            }).ToList();
+
+            await PurchaseRequestService.CreatePurchaseRequestAsync(purchaseRequest, purchaseRequestItems);
+
+            // Limpiar carrito
+            CartService.ClearCart();
+
+            // Redirigir a página de confirmación o mostrar mensaje
+            Navigation.NavigateTo("/purchase-success");
+        }
+        catch (Exception ex)
+        {
+            // En producción esto iría a logging
+            Console.WriteLine($"Error processing purchase: {ex.Message}");
+            // Aquí podrías mostrar un mensaje de error al usuario
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        CartService.OnCartUpdated -= UpdateCartItems;
+    }
+} 
