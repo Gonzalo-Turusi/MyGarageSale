@@ -15,6 +15,7 @@ public interface IItemService
     Task<bool> DeleteItemAsync(int id);
     Task<bool> MarkAsSoldAsync(int id);
     Task<bool> MarkAsAvailableAsync(int id);
+    Task<List<int>> GetTopInterestItemIdsAsync(int count = 4);
 }
 
 public class ItemService : IItemService
@@ -36,6 +37,7 @@ public class ItemService : IItemService
                 .Include(i => i.Category)
                 .Include(i => i.Images.OrderBy(img => img.Order))
                 .OrderBy(i => i.IsSold)
+                .ThenByDescending(i => i.InterestedCount)
                 .ThenByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
@@ -54,7 +56,8 @@ public class ItemService : IItemService
                 .Include(i => i.Category)
                 .Include(i => i.Images.OrderBy(img => img.Order))
                 .Where(i => !i.IsSold)
-                .OrderByDescending(i => i.CreatedAt)
+                .OrderByDescending(i => i.InterestedCount)
+                .ThenByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -72,7 +75,8 @@ public class ItemService : IItemService
                 .Include(i => i.Category)
                 .Include(i => i.Images.OrderBy(img => img.Order))
                 .Where(i => i.CategoryId == categoryId && !i.IsSold)
-                .OrderByDescending(i => i.CreatedAt)
+                .OrderByDescending(i => i.InterestedCount)
+                .ThenByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -226,6 +230,27 @@ public class ItemService : IItemService
         {
             _logger.LogError(ex, "Error marking item as available {ItemId}", id);
             return false;
+        }
+    }
+
+    public async Task<List<int>> GetTopInterestItemIdsAsync(int count = 4)
+    {
+        try
+        {
+            var topItemIds = await _context.Items
+                .Where(i => !i.IsSold && i.InterestedCount > 0) // Solo items disponibles con interés
+                .OrderByDescending(i => i.InterestedCount)
+                .ThenByDescending(i => i.CreatedAt) // Como tie-breaker
+                .Take(count)
+                .Select(i => i.Id)
+                .ToListAsync();
+                
+            return topItemIds;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving top interest item IDs");
+            return new List<int>();
         }
     }
 } 

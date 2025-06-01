@@ -13,7 +13,7 @@
 @if (isLoading)
 {
     <div class="flex justify-center items-center py-16">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         <span class="ml-3 text-lg text-gray-600">Cargando artículo...</span>
     </div>
 }
@@ -23,7 +23,7 @@ else if (item == null)
         <h1 class="text-2xl font-bold text-gray-900 mb-4">Artículo no encontrado</h1>
         <p class="text-gray-600 mb-6">El artículo que buscas no existe o ha sido eliminado.</p>
         <button @onclick="GoToCatalog" 
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
             Volver al Catálogo
         </button>
     </div>
@@ -65,7 +65,6 @@ else
                         }
                     </div>
                     <h1 class="text-3xl font-bold @(item.IsSold ? "text-gray-500" : "text-gray-900") mb-2">@item.Title</h1>
-                    <p class="text-sm text-gray-500">Publicado el @item.CreatedAt.ToString("dd/MM/yyyy")</p>
                 </div>
 
                 <!-- Precio -->
@@ -74,6 +73,19 @@ else
                         <span class="text-4xl font-bold @(item.IsSold ? "text-gray-400" : "text-gray-800")">$@item.Price.ToString("F2")</span>
                     </div>
                 </div>
+
+                <!-- Interesados -->
+                @if (item.InterestedCount > 0)
+                {
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="flex items-center gap-2 text-orange-600">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path>
+                            </svg>
+                            <span class="font-medium">@item.InterestedCount persona@(item.InterestedCount == 1 ? "" : "s") interesada@(item.InterestedCount == 1 ? "" : "s")</span>
+                        </div>
+                    </div>
+                }
 
                 <!-- Descripción -->
                 <div class="border-t border-gray-200 pt-6">
@@ -84,40 +96,40 @@ else
                 <!-- Acciones -->
                 <div class="border-t border-gray-200 pt-6">
                     <div class="flex flex-col items-center space-y-3 max-w-sm mx-auto">
-                        @if (!item.IsSold)
+                    @if (!item.IsSold)
+                    {
+                        @if (IsInCart)
                         {
-                            @if (IsInCart)
-                            {
-                                <button @onclick="RemoveFromCart" 
-                                        class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                            <button @onclick="RemoveFromCart" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                    Quitar del Carrito
-                                </button>
-                            }
-                            else
-                            {
-                                <button @onclick="AddToCart" 
-                                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"></path>
-                                    </svg>
-                                    Agregar al Carrito
-                                </button>
-                            }
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Quitar del Carrito
+                            </button>
                         }
                         else
                         {
+                            <button @onclick="AddToCart" 
+                                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"></path>
+                                </svg>
+                                Agregar al Carrito
+                            </button>
+                        }
+                    }
+                    else
+                    {
                             <div class="w-full bg-gray-100 text-gray-500 py-3 px-6 rounded-lg font-medium text-center border border-gray-300">
                                 No disponible
-                            </div>
-                        }
-                        
-                        <button @onclick="GoToCatalog" 
+                        </div>
+                    }
+                    
+                    <button @onclick="GoToCatalog" 
                                 class="w-full bg-white hover:bg-gray-50 text-indigo-600 border border-indigo-600 py-2.5 px-6 rounded-lg font-medium transition-colors">
-                            Volver al Catálogo
-                        </button>
+                        Volver al Catálogo
+                    </button>
                     </div>
                 </div>
             </div>

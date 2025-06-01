@@ -54,13 +54,13 @@ public class CartService : ICartService
                 return; // No permitir duplicados ya que solo hay 1 de cada artículo
             }
             
-            _cartItems.Add(new CartItem
-            {
-                Item = item,
+                _cartItems.Add(new CartItem
+                {
+                    Item = item,
                 Quantity = 1 // Siempre 1 para garage sale
-            });
+                });
             
-            _logger.LogInformation("Added item {ItemId} to cart", item.Id);
+                _logger.LogInformation("Added item {ItemId} to cart", item.Id);
             OnCartUpdated?.Invoke();
         }
         catch (Exception ex)

@@ -99,6 +99,15 @@ public class PurchaseRequestService : IPurchaseRequestService
                 _context.PurchaseRequestItems.Add(item);
             }
 
+            // Increment interested count for each item
+            var itemIds = purchaseRequestItems.Select(pri => pri.ItemId).ToList();
+            var items = await _context.Items.Where(i => itemIds.Contains(i.Id)).ToListAsync();
+            
+            foreach (var item in items)
+            {
+                item.InterestedCount++;
+            }
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 

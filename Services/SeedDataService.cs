@@ -54,7 +54,8 @@ public class SeedDataService : ISeedDataService
                     Price = 420.00m,
                     CategoryId = electronicsCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-10),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 15 // Muy popular - será HOT
                 },
                 new Item
                 {
@@ -63,7 +64,8 @@ public class SeedDataService : ISeedDataService
                     Price = 280.00m,
                     CategoryId = electronicsCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-8),
-                    IsSold = true // VENDIDO - para mostrar visualmente
+                    IsSold = true, // VENDIDO - para mostrar visualmente
+                    InterestedCount = 22 // Muy solicitado antes de venderse
                 },
                 new Item
                 {
@@ -72,7 +74,8 @@ public class SeedDataService : ISeedDataService
                     Price = 850.00m,
                     CategoryId = electronicsCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-5),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 12 // Popular - será HOT
                 },
 
                 // Ropa
@@ -83,7 +86,8 @@ public class SeedDataService : ISeedDataService
                     Price = 45.00m,
                     CategoryId = clothingCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-12),
-                    IsSold = true // VENDIDO - para mostrar visualmente
+                    IsSold = true, // VENDIDO - para mostrar visualmente
+                    InterestedCount = 8 // Tenía interés antes de venderse
                 },
                 new Item
                 {
@@ -92,7 +96,8 @@ public class SeedDataService : ISeedDataService
                     Price = 35.00m,
                     CategoryId = clothingCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-7),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 6 // Algo de interés
                 },
 
                 // Hogar
@@ -103,7 +108,8 @@ public class SeedDataService : ISeedDataService
                     Price = 120.00m,
                     CategoryId = homeCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-15),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 4 // Interés moderado
                 },
                 new Item
                 {
@@ -112,7 +118,8 @@ public class SeedDataService : ISeedDataService
                     Price = 25.00m,
                     CategoryId = homeCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-3),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 13 // Popular - será HOT
                 },
                 new Item
                 {
@@ -121,7 +128,8 @@ public class SeedDataService : ISeedDataService
                     Price = 60.00m,
                     CategoryId = homeCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-6),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 2 // Poco interés
                 },
 
                 // Libros
@@ -132,7 +140,8 @@ public class SeedDataService : ISeedDataService
                     Price = 80.00m,
                     CategoryId = booksCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-20),
-                    IsSold = true // VENDIDO - para mostrar visualmente  
+                    IsSold = true, // VENDIDO - para mostrar visualmente  
+                    InterestedCount = 18 // Muy popular antes de venderse
                 },
                 new Item
                 {
@@ -141,7 +150,8 @@ public class SeedDataService : ISeedDataService
                     Price = 40.00m,
                     CategoryId = booksCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-4),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 7 // Buen interés por tech
                 },
 
                 // Deportes
@@ -152,7 +162,8 @@ public class SeedDataService : ISeedDataService
                     Price = 320.00m,
                     CategoryId = sportsCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-18),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 9 // Popular para deportistas
                 },
                 new Item
                 {
@@ -161,7 +172,8 @@ public class SeedDataService : ISeedDataService
                     Price = 150.00m,
                     CategoryId = sportsCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-9),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 5 // Moderado interés
                 },
                 new Item
                 {
@@ -170,7 +182,8 @@ public class SeedDataService : ISeedDataService
                     Price = 1500.00m,
                     CategoryId = electronicsCategory.Id,
                     CreatedAt = DateTime.UtcNow.AddDays(-2),
-                    IsSold = false
+                    IsSold = false,
+                    InterestedCount = 11 // Alto interés por lujo
                 }
             };
 

@@ -103,7 +103,7 @@ else
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @foreach (var item in filteredItems)
         {
-            <ItemCard Item="item" />
+            <ItemCard Item="item" IsHot="@topInterestItemIds.Contains(item.Id)" />
         }
     </div>
 }
@@ -117,6 +117,7 @@ else
     private int? selectedCategoryId = null;
     private bool showOnlyAvailable = true; // Por defecto mostrar solo disponibles
     private bool isLoading = true;
+    private List<int> topInterestItemIds = new(); // IDs de los items más solicitados
 
     protected override async Task OnInitializedAsync()
     {
@@ -132,13 +133,15 @@ else
             // Cargar datos en paralelo para mejor rendimiento
             var allItemsTask = ItemService.GetAllItemsAsync();
             var categoriesTask = CategoryService.GetAllCategoriesAsync();
+            var topInterestTask = ItemService.GetTopInterestItemIdsAsync();
 
-            await Task.WhenAll(allItemsTask, categoriesTask);
+            await Task.WhenAll(allItemsTask, categoriesTask, topInterestTask);
 
             allItems = await allItemsTask;
             availableItems = allItems.Where(i => !i.IsSold).ToList();
             soldItems = allItems.Where(i => i.IsSold).ToList();
             categories = await categoriesTask;
+            topInterestItemIds = await topInterestTask;
             
             // Aplicar filtros por defecto (solo disponibles)
             ApplyFilters();

@@ -28,6 +28,9 @@ public class Item
     // Control de stock - por defecto 1 (artículo único de garage sale)
     public int Stock { get; set; } = 1;
     
+    // Interested count - increments each time someone requests this item
+    public int InterestedCount { get; set; } = 0;
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? UpdatedAt { get; set; }

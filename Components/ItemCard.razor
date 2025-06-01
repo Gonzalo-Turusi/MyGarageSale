@@ -14,7 +14,7 @@
         @if (Item.IsSold)
         {
             <!-- Badge VENDIDO -->
-            <div class="absolute top-2 left-2">
+            <div class="absolute top-2 left-2 z-10">
                 <span class="inline-flex px-2 py-1 text-xs font-bold rounded-full bg-red-600 text-white shadow-lg">
                     VENDIDO
                 </span>
@@ -22,10 +22,21 @@
         }
         else
         {
-            <!-- Badge de categoría -->
-            <div class="absolute top-2 left-2">
+            <!-- Badge de categoría (siempre visible en esquina izquierda) -->
+            <div class="absolute top-2 left-2 z-10">
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
                     @Item.Category?.Name
+                </span>
+            </div>
+        }
+        
+        <!-- Badge HOT (esquina superior derecha) - solo si no está vendido y es HOT -->
+        @if (IsHot && !Item.IsSold)
+        {
+            <div style="position: absolute; top: 8px; right: 8px; z-index: 10;">
+                <span class="inline-flex px-2 py-1 text-xs font-bold rounded-full text-pink-700 shadow-sm animate-pulse border border-pink-200" 
+                      style="background-color: rgba(253, 242, 248, 0.8);">
+                    🔥 HOT
                 </span>
             </div>
         }
@@ -45,9 +56,6 @@
             <div class="flex flex-col">
                 <span class="text-2xl font-bold @(Item.IsSold ? "text-gray-400" : "text-gray-800")">
                     $@Item.Price.ToString("F2")
-                </span>
-                <span class="text-xs text-gray-500">
-                    @Item.CreatedAt.ToString("dd/MM/yyyy")
                 </span>
             </div>
             
@@ -86,6 +94,7 @@
 
 @code {
     [Parameter] public Item Item { get; set; } = null!;
+    [Parameter] public bool IsHot { get; set; } = false;
     
     private bool IsInCart => CartService.IsItemInCart(Item.Id);
     
