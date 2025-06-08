@@ -9,10 +9,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add Entity Framework
+// Add Entity Framework - Usar Azure SQL en producción, SQLite en desarrollo
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? 
-                     "Data Source=garage_sale.db"));
+{
+    if (builder.Environment.IsProduction())
+    {
+        // En producción usar Azure SQL
+        var connectionString = builder.Configuration.GetConnectionString("AzureSqlConnection") ??
+                             throw new InvalidOperationException("La cadena de conexión 'AzureSqlConnection' no está configurada.");
+        options.UseSqlServer(connectionString);
+    }
+    else
+    {
+        // En desarrollo usar SQLite
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+                         "Data Source=garage_sale.db");
+    }
+});
 
 // Register application services
 builder.Services.AddScoped<IItemService, ItemService>();
@@ -20,10 +33,36 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IPurchaseRequestService, PurchaseRequestService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISeedDataService, SeedDataService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<ICartService, CartService>();
 
 // Add HTTP client for file uploads
 builder.Services.AddHttpClient();
+
+// Register image upload services
+// Primero registramos ambos servicios
+builder.Services.AddScoped<ImgurImageUploadService>();
+builder.Services.AddScoped<LocalImageUploadService>();
+
+// Luego registramos la interfaz con una factory que decide cuál usar
+builder.Services.AddScoped<IImageUploadService>(serviceProvider =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+    
+    // Preferir Imgur si está configurado
+    var imgurClientId = configuration["Imgur:ClientId"];
+    if (!string.IsNullOrEmpty(imgurClientId))
+    {
+        logger.LogInformation("🖼️ Usando Imgur para almacenamiento de imágenes");
+        return serviceProvider.GetRequiredService<ImgurImageUploadService>();
+    }
+    else
+    {
+        logger.LogInformation("💾 Usando almacenamiento local para imágenes (Imgur no configurado)");
+        return serviceProvider.GetRequiredService<LocalImageUploadService>();
+    }
+});
 
 var app = builder.Build();
 

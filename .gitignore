@@ -494,3 +494,4 @@ secrets.json
 # CSS compilation artifacts
 wwwroot/css/tailwind.css.map
 wwwroot/css/site.css.map
+app.zip

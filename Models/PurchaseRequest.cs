@@ -15,6 +15,10 @@ public class PurchaseRequest
     [StringLength(200)]
     public string CustomerEmail { get; set; } = string.Empty;
     
+    [Required]
+    [StringLength(20)]
+    public string CustomerPhone { get; set; } = string.Empty;
+    
     [StringLength(1000)]
     public string? Comments { get; set; }
     

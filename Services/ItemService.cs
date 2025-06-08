@@ -16,6 +16,7 @@ public interface IItemService
     Task<bool> MarkAsSoldAsync(int id);
     Task<bool> MarkAsAvailableAsync(int id);
     Task<List<int>> GetTopInterestItemIdsAsync(int count = 4);
+    Task<bool> SaveItemImagesAsync(int itemId, List<ItemImage> images);
 }
 
 public class ItemService : IItemService
@@ -251,6 +252,42 @@ public class ItemService : IItemService
         {
             _logger.LogError(ex, "Error retrieving top interest item IDs");
             return new List<int>();
+        }
+    }
+
+    public async Task<bool> SaveItemImagesAsync(int itemId, List<ItemImage> images)
+    {
+        try
+        {
+            var item = await _context.Items
+                .Include(i => i.Images)
+                .FirstOrDefaultAsync(i => i.Id == itemId);
+            
+            if (item == null)
+            {
+                return false;
+            }
+
+            // Eliminar imágenes existentes
+            _context.ItemImages.RemoveRange(item.Images);
+            
+            // Agregar nuevas imágenes
+            foreach (var image in images)
+            {
+                image.ItemId = itemId;
+                image.CreatedAt = DateTime.UtcNow;
+            }
+            
+            _context.ItemImages.AddRange(images);
+            await _context.SaveChangesAsync();
+            
+            _logger.LogInformation("Item images updated successfully for item ID {ItemId}", itemId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving item images for item ID {ItemId}", itemId);
+            return false;
         }
     }
 } 

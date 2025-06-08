@@ -11,6 +11,7 @@ public interface IPurchaseRequestService
     Task<PurchaseRequest?> GetPurchaseRequestByIdAsync(int id);
     Task<PurchaseRequest> CreatePurchaseRequestAsync(PurchaseRequest purchaseRequest, List<PurchaseRequestItem> purchaseRequestItems);
     Task<bool> MarkAsProcessedAsync(int id);
+    Task<bool> MarkAsPendingAsync(int id);
     Task<bool> DeletePurchaseRequestAsync(int id);
 }
 
@@ -117,12 +118,18 @@ public class PurchaseRequestService : IPurchaseRequestService
             // Enviar notificación por email
             try
             {
+                // 📧 Email al administrador (notificación de nueva compra)
                 await _emailService.SendPurchaseRequestNotificationAsync(completePurchaseRequest!, completePurchaseRequest!.Items.ToList());
-                _logger.LogInformation("Email notification sent for purchase request {RequestId}", purchaseRequest.Id);
+                _logger.LogInformation("📬 Email de notificación enviado al administrador para la solicitud {RequestId}", purchaseRequest.Id);
+                
+                // 📧 Email al cliente (confirmación de pedido)
+                await _emailService.SendPurchaseConfirmationToCustomerAsync(completePurchaseRequest!, completePurchaseRequest!.Items.ToList());
+                _logger.LogInformation("📬 Email de confirmación enviado al cliente {CustomerEmail} para la solicitud {RequestId}", 
+                    completePurchaseRequest.CustomerEmail, purchaseRequest.Id);
             }
             catch (Exception emailEx)
             {
-                _logger.LogError(emailEx, "Failed to send email notification for purchase request {RequestId}, but order was created successfully", purchaseRequest.Id);
+                _logger.LogError(emailEx, "❌ Error enviando emails para la solicitud {RequestId}, pero el pedido fue creado exitosamente", purchaseRequest.Id);
             }
             
             _logger.LogInformation("Purchase request created successfully with ID {RequestId}", purchaseRequest.Id);
@@ -155,6 +162,29 @@ public class PurchaseRequestService : IPurchaseRequestService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking purchase request as processed {RequestId}", id);
+            return false;
+        }
+    }
+
+    public async Task<bool> MarkAsPendingAsync(int id)
+    {
+        try
+        {
+            var purchaseRequest = await _context.PurchaseRequests.FindAsync(id);
+            if (purchaseRequest == null)
+            {
+                return false;
+            }
+
+            purchaseRequest.IsProcessed = false;
+            await _context.SaveChangesAsync();
+            
+            _logger.LogInformation("Purchase request marked as pending with ID {RequestId}", id);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking purchase request as pending {RequestId}", id);
             return false;
         }
     }

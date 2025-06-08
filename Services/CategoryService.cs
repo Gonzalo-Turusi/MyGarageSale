@@ -12,6 +12,7 @@ public interface ICategoryService
     Task<Category> UpdateCategoryAsync(Category category);
     Task<bool> DeleteCategoryAsync(int id);
     Task<bool> CategoryHasItemsAsync(int id);
+    Task<int> GetItemsCountByCategoryAsync(int id);
 }
 
 public class CategoryService : ICategoryService
@@ -138,6 +139,19 @@ public class CategoryService : ICategoryService
         {
             _logger.LogError(ex, "Error checking if category has items {CategoryId}", id);
             return true; // Return true to prevent deletion if there's an error
+        }
+    }
+
+    public async Task<int> GetItemsCountByCategoryAsync(int id)
+    {
+        try
+        {
+            return await _context.Items.CountAsync(i => i.CategoryId == id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error counting items for category {CategoryId}", id);
+            return 0;
         }
     }
 } 
