@@ -1,11 +1,11 @@
 name: 🚀 Desplegar MyGarageSale a Azure
 
 on:
-  # push:
-  #   branches: [ main ]  # 🔒 Deshabilitado para pruebas
-  # pull_request:
-  #   branches: [ main ]  # 🔒 Deshabilitado para pruebas
-  workflow_dispatch:  # ✅ Solo ejecución manual por ahora
+  push:
+    branches: [ main ]  # 🚀 Automático en main
+  pull_request:
+    branches: [ main ]  # 🧪 Testing en PRs
+  workflow_dispatch:  # 🎛️ Ejecución manual disponible
 
 env:
   DOTNET_VERSION: '9.0.x'
