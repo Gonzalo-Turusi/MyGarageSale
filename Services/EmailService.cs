@@ -104,14 +104,7 @@ public class EmailService : IEmailService
     {
         try
         {
-            // First try SendGrid (for Azure)
-            var sendGridApiKey = _configuration["SendGrid:ApiKey"];
-            if (!string.IsNullOrEmpty(sendGridApiKey))
-            {
-                return await SendEmailViaSendGridAsync(toEmail, subject, body, sendGridApiKey);
-            }
-
-            // Fallback to SMTP (for local development)
+            // Usar SMTP (Gmail) para envío de emails
             var smtpHost = _configuration["Smtp:Host"];
             if (!string.IsNullOrEmpty(smtpHost))
             {
@@ -126,22 +119,6 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending email to {ToEmail}", toEmail);
-            return false;
-        }
-    }
-
-    private async Task<bool> SendEmailViaSendGridAsync(string toEmail, string subject, string body, string apiKey)
-    {
-        try
-        {
-            // TODO: Implement SendGrid when we deploy to Azure
-            // For now, using the SMTP fallback
-            _logger.LogInformation("SendGrid not implemented yet, falling back to SMTP");
-            return await SendEmailViaSmtpAsync(toEmail, subject, body);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error sending email via SendGrid");
             return false;
         }
     }

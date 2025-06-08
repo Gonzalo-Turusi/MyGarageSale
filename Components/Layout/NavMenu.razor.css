@@ -1,3 +1,22 @@
+/* Estilos responsivos para header móvil */
+@media (max-width: 640px) {
+    .navbar-brand {
+        font-size: 0.875rem;
+        max-width: 60%;
+    }
+    
+    .mobile-nav-container {
+        height: 3.5rem;
+        padding: 0 0.75rem;
+    }
+    
+    .mobile-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
 .navbar-toggler {
     appearance: none;
     cursor: pointer;
