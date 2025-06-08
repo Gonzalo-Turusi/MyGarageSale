@@ -7,9 +7,15 @@
             <!-- Logo y nombre -->
             <div class="flex items-center min-w-0 flex-1">
                 <NavLink href="" class="flex items-center gap-2 sm:gap-3 text-white hover:text-blue-200 transition-colors min-w-0">
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                    </svg>
+                    <!-- Logo SVG - Etiqueta de Precio -->
+                    <div class="bg-white p-2 sm:p-2.5 rounded-lg shadow-md">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-800" fill="currentColor" viewBox="0 0 24 24">
+                            <!-- Etiqueta de precio más gruesa -->
+                            <path stroke-width="1.5" d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4C2.9 2 2 2.9 2 4v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+                            <!-- Signo de peso más grande -->
+                            <text x="13" y="17" font-size="10" font-weight="bold" fill="white">$</text>
+                        </svg>
+                    </div>
                     <span class="text-sm sm:text-xl font-bold truncate">
                         <span class="hidden sm:inline">Venta Gonza y Yenny</span>
                         <span class="sm:hidden">Gonza y Yenny</span>
@@ -17,47 +23,15 @@
                 </NavLink>
             </div>
 
-            <!-- Navegación desktop -->
-            <div class="hidden md:flex items-center space-x-6">
-                <!-- Widget del carrito -->
+            <!-- Widget del carrito - Siempre visible -->
+            <div class="flex items-center">
                 <CartWidget />
-            </div>
-
-            <!-- Botón de menú móvil y carrito -->
-            <div class="md:hidden flex items-center space-x-2">
-                <CartWidget />
-                <button @onclick="ToggleMobileMenu" 
-                        class="text-white hover:text-blue-200 focus:outline-none p-1">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Menú móvil -->
-    <div class="md:hidden @(showMobileMenu ? "block" : "hidden")">
-        <div class="px-4 pt-2 pb-3 space-y-1 bg-blue-900 border-t border-blue-700">
-            <div class="text-center text-white py-2">
-                <span class="text-sm text-blue-200">Haz clic en el logo para ir al catálogo</span>
             </div>
         </div>
     </div>
 </nav>
 
 @code {
-    private bool showMobileMenu = false;
-
-    private void ToggleMobileMenu()
-    {
-        showMobileMenu = !showMobileMenu;
-    }
-
-    private void CloseMobileMenu()
-    {
-        showMobileMenu = false;
-    }
+    // Ya no necesitamos el estado del menú móvil
 }
 

@@ -4,23 +4,23 @@
 @inject IItemService ItemService
 @inject IJSRuntime JSRuntime
 
-<div class="p-8">
+<div class="p-4 sm:p-8">
     <!-- Header Section -->
-    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8">
+    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6">
         <div>
-            <h2 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <h2 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 Solicitudes de Compra
             </h2>
-            <p class="text-gray-600 mt-2">Revisa y gestiona las solicitudes de compra enviadas por los usuarios</p>
+            <p class="text-gray-600 mt-2 text-sm sm:text-base">Revisa y gestiona las solicitudes de compra enviadas por los usuarios</p>
         </div>
-        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 lg:mt-0">
-            <select @onchange="FilterByStatus" class="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 lg:mt-0 w-full sm:w-auto">
+            <select @onchange="FilterByStatus" class="px-3 sm:px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full sm:w-auto">
                 <option value="">Todas las solicitudes</option>
                 <option value="Pending">Pendientes</option>
                 <option value="Processed">Procesadas</option>
             </select>
             <button @onclick="LoadData" 
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm">
+                    class="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm w-full sm:w-auto">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
@@ -41,43 +41,43 @@
     else
     {
         <!-- Statistics Cards Mejoradas -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-blue-100 text-sm font-medium">Total Solicitudes</p>
-                        <p class="text-3xl font-bold">@requests.Count</p>
+                        <p class="text-blue-100 text-xs sm:text-sm font-medium">Total Solicitudes</p>
+                        <p class="text-2xl sm:text-3xl font-bold">@requests.Count</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl">
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white/20 p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl shadow-xl p-6 text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+            <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-yellow-100 text-sm font-medium">Pendientes</p>
-                        <p class="text-3xl font-bold">@requests.Count(r => !r.IsProcessed)</p>
+                        <p class="text-yellow-100 text-xs sm:text-sm font-medium">Pendientes</p>
+                        <p class="text-2xl sm:text-3xl font-bold">@requests.Count(r => !r.IsProcessed)</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl">
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white/20 p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-xl p-6 text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 text-white hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Procesadas</p>
-                        <p class="text-3xl font-bold">@requests.Count(r => r.IsProcessed)</p>
+                        <p class="text-green-100 text-xs sm:text-sm font-medium">Procesadas</p>
+                        <p class="text-2xl sm:text-3xl font-bold">@requests.Count(r => r.IsProcessed)</p>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl">
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white/20 p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                        <svg class="h-6 w-6 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -91,26 +91,26 @@
             <div class="space-y-4">
                 @foreach (var request in filteredRequests.OrderByDescending(r => r.CreatedAt))
                 {
-                    <div class="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden hover:shadow-xl transition-all duration-300">
-                        <div class="p-6">
+                    <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden hover:shadow-xl transition-all duration-300">
+                        <div class="p-4 sm:p-6">
                             <!-- Header de la solicitud -->
-                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
-                                <div class="flex items-start space-x-4 mb-4 lg:mb-0 flex-1">
+                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-4 sm:mb-6">
+                                <div class="flex items-start space-x-3 sm:space-x-4 mb-4 lg:mb-0 flex-1">
                                     <!-- Avatar del usuario -->
-                                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-3 flex-shrink-0">
-                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0">
+                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                         </svg>
                                     </div>
                                     
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="text-lg font-bold text-gray-900 truncate">@request.CustomerName</h3>
+                                        <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">@request.CustomerName</h3>
                                         <p class="text-gray-600 text-sm truncate">@request.CustomerEmail</p>
                                         <p class="text-xs text-gray-500 mt-1">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
                                         
                                         <!-- Total de la solicitud -->
                                         <div class="mt-2">
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800">
+                                            <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-green-100 text-green-800">
                                                 Total: $@GetRequestTotal(request).ToString("N0")
                                             </span>
                                         </div>
@@ -118,11 +118,11 @@
                                 </div>
 
                                 <!-- Estado y acciones -->
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 lg:flex-shrink-0">
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 lg:flex-shrink-0">
                                     @if (!request.IsProcessed)
                                     {
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-yellow-500 text-white shadow-md">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span class="inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold bg-yellow-500 text-white shadow-md">
+                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                             Pendiente
@@ -130,32 +130,32 @@
                                     }
                                     else
                                     {
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-500 text-white shadow-md">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span class="inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold bg-green-500 text-white shadow-md">
+                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                             Procesada
                                         </span>
                                     }
 
-                                    <div class="flex space-x-2">
+                                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                         @if (!request.IsProcessed)
                                         {
                                             <button @onclick="() => MarkAsProcessed(request.Id)" 
-                                                    class="px-4 py-2 text-sm font-semibold text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors duration-200">
+                                                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors duration-200 text-center">
                                                 Marcar procesada
                                             </button>
                                         }
                                         else
                                         {
                                             <button @onclick="() => MarkAsPending(request.Id)" 
-                                                    class="px-4 py-2 text-sm font-semibold text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-lg transition-colors duration-200">
+                                                    class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-lg transition-colors duration-200 text-center">
                                                 Marcar pendiente
                                             </button>
                                         }
                                         
                                         <button @onclick="() => DeleteRequest(request.Id)" 
-                                                class="px-4 py-2 text-sm font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors duration-200">
+                                                class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors duration-200 text-center">
                                             Eliminar
                                         </button>
                                     </div>
@@ -165,53 +165,54 @@
                             <!-- Comentarios -->
                             @if (!string.IsNullOrEmpty(request.Comments))
                             {
-                                <div class="mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                                    <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg sm:rounded-xl border border-gray-200">
+                                    <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                        <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                                         </svg>
                                         Comentarios:
                                     </h4>
-                                    <p class="text-gray-700 text-sm leading-relaxed">@request.Comments</p>
+                                    <p class="text-gray-700 text-xs sm:text-sm leading-relaxed">@request.Comments</p>
                                 </div>
                             }
 
                             <!-- Artículos solicitados -->
                             <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                                     </svg>
-                                    Artículos solicitados (@request.Items.Count)
+                                    <span class="hidden sm:inline">Artículos solicitados (@request.Items.Count)</span>
+                                    <span class="sm:hidden">Artículos (@request.Items.Count)</span>
                                 </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     @foreach (var requestItem in request.Items)
                                     {
-                                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
-                                            <div class="flex items-center space-x-3">
+                                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
+                                            <div class="flex items-center space-x-2 sm:space-x-3">
                                                 @if (!string.IsNullOrEmpty(requestItem.Item.MainImagePath))
                                                 {
-                                                    <img src="@requestItem.Item.MainImagePath" alt="@requestItem.Item.Title" class="h-12 w-12 object-cover rounded-lg shadow-sm" />
+                                                    <img src="@requestItem.Item.MainImagePath" alt="@requestItem.Item.Title" class="h-10 w-10 sm:h-12 sm:w-12 object-cover rounded-lg shadow-sm flex-shrink-0" />
                                                 }
                                                 else
                                                 {
-                                                    <div class="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <div class="h-10 w-10 sm:h-12 sm:w-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                        <svg class="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                         </svg>
                                                     </div>
                                                 }
                                                 
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="font-semibold text-gray-900 text-sm truncate">@requestItem.Item.Title</p>
-                                                    <p class="text-green-600 font-bold text-sm">$@requestItem.Item.Price.ToString("N0")</p>
+                                                    <p class="font-semibold text-gray-900 text-xs sm:text-sm truncate">@requestItem.Item.Title</p>
+                                                    <p class="text-green-600 font-bold text-xs sm:text-sm">$@requestItem.Item.Price.ToString("N0")</p>
                                                     @if (requestItem.Quantity > 1)
                                                     {
                                                         <p class="text-xs text-gray-500">Cantidad: @requestItem.Quantity</p>
                                                     }
                                                     @if (requestItem.Item.IsSold)
                                                     {
-                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 mt-1">
+                                                        <span class="inline-flex items-center px-2 py-0.5 sm:py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 mt-1">
                                                             Vendido
                                                         </span>
                                                     }
