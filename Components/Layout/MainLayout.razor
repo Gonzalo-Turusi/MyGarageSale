@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using MyGarageSale.Components
 
 <div class="min-h-screen bg-gray-50">
     <NavMenu />
@@ -6,6 +7,9 @@
     <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         @Body
     </main>
+    
+    <!-- Botón flotante del carrito -->
+    <FloatingCartButton />
     
     <!-- Footer -->
     <footer class="bg-gray-50 border-t mt-16">
