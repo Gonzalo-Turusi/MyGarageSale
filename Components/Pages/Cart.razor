@@ -2,6 +2,7 @@
 @using MyGarageSale.Models
 @using MyGarageSale.Services
 @using MyGarageSale.Components
+@using MyGarageSale.Validators
 @using System.ComponentModel.DataAnnotations
 @inject ICartService CartService
 @inject IPurchaseRequestService PurchaseRequestService
@@ -127,7 +128,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
                             <InputText @bind-Value="purchaseForm.CustomerPhone" 
                                       class="form-control" 
-                                      placeholder="+54 9 11 1234-5678" />
+                                      placeholder="(+54) 9 11 - 1234-5678" />
                             <ValidationMessage For="() => purchaseForm.CustomerPhone" class="validation-message" />
                         </div>
                         
@@ -193,11 +194,11 @@
         public string CustomerName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El email es requerido")]
-        [EmailAddress(ErrorMessage = "Formato de email inválido")]
+        [StrictEmail(ErrorMessage = "Ingresa un email válido (ejemplo: usuario@dominio.com)")]
         public string CustomerEmail { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El teléfono es requerido")]
-        [StringLength(20, ErrorMessage = "El teléfono no puede exceder 20 caracteres")]
+        [ArgentinePhone(ErrorMessage = "El formato del teléfono debe ser: (+54) 9 11 - 1234-5678")]
         public string CustomerPhone { get; set; } = string.Empty;
 
         [StringLength(500, ErrorMessage = "Los comentarios no pueden exceder 500 caracteres")]
