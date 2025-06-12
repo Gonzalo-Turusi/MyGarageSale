@@ -34,7 +34,7 @@ builder.Services.AddScoped<IPurchaseRequestService, PurchaseRequestService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISeedDataService, SeedDataService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<ICartService, CartService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 // Add HTTP client for file uploads
 builder.Services.AddHttpClient();

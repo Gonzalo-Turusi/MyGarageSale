@@ -6,6 +6,7 @@
 @inject ICartService CartService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@implements IDisposable
 @rendermode InteractiveServer
 
 <PageTitle>@(item?.Title ?? "Artículo") - Venta Gonza y Yenny</PageTitle>
@@ -88,9 +89,34 @@ else
                 }
 
                 <!-- Descripción -->
+                @if (!string.IsNullOrEmpty(item.Description))
+                {
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h3>
+                        <div class="prose prose-sm max-w-none text-gray-700">
+                            @foreach (var paragraph in item.Description.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <p class="mb-2">@paragraph</p>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Información adicional -->
                 <div class="border-t border-gray-200 pt-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h3>
-                    <p class="@(item.IsSold ? "text-gray-400" : "text-gray-700") whitespace-pre-line">@item.Description</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Información adicional</h3>
+                    <dl class="grid grid-cols-1 gap-3 text-sm">
+                        <div class="flex justify-between">
+                            <dt class="text-gray-600">Estado:</dt>
+                            <dd class="font-medium @(item.IsSold ? "text-red-600" : "text-green-600")">
+                                @(item.IsSold ? "Vendido" : "Disponible")
+                            </dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-gray-600">Categoría:</dt>
+                            <dd class="font-medium text-gray-900">@item.Category?.Name</dd>
+                        </div>
+                    </dl>
                 </div>
 
                 <!-- Acciones -->
@@ -142,16 +168,30 @@ else
     
     private Item? item;
     private bool isLoading = true;
+    private bool IsInCart = false;
+    private bool hasRendered = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await LoadItem();
         CartService.OnCartUpdated += UpdateCartState;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            hasRendered = true;
+            CartService.InitializeAfterRender();
+            await LoadItem();
+        }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await LoadItem();
+        if (hasRendered)
+        {
+            await LoadItem();
+        }
     }
 
     private async Task LoadItem()
@@ -160,6 +200,10 @@ else
         try
         {
             item = await ItemService.GetItemByIdAsync(Id);
+            if (item != null && hasRendered)
+            {
+                await UpdateCartStatus();
+            }
         }
         catch (Exception ex)
         {
@@ -169,29 +213,40 @@ else
         finally
         {
             isLoading = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
-    private bool IsInCart => item != null && CartService.IsItemInCart(item.Id);
-
-    private void UpdateCartState()
+    private async Task UpdateCartStatus()
     {
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void AddToCart()
-    {
-        if (item != null && !item.IsSold)
+        if (item != null && hasRendered)
         {
-            CartService.AddToCart(item);
+            IsInCart = await CartService.IsItemInCartAsync(item.Id);
         }
     }
 
-    private void RemoveFromCart()
+    private async void UpdateCartState()
     {
-        if (item != null)
+        if (hasRendered)
         {
-            CartService.RemoveFromCart(item.Id);
+            await UpdateCartStatus();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task AddToCart()
+    {
+        if (item != null && !item.IsSold && hasRendered)
+        {
+            await CartService.AddToCartAsync(item);
+        }
+    }
+
+    private async Task RemoveFromCart()
+    {
+        if (item != null && hasRendered)
+        {
+            await CartService.RemoveFromCartAsync(item.Id);
         }
     }
 

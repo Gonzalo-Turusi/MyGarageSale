@@ -2,6 +2,7 @@
 @using MyGarageSale.Services
 @inject ICartService CartService
 @inject NavigationManager Navigation
+@implements IDisposable
 @rendermode InteractiveServer
 
 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -9,7 +10,8 @@
     <div class="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden @(Item.IsSold ? "" : "cursor-pointer")" @onclick="HandleImageClick">
         <img src="@GetImagePath()" 
              alt="@Item.Title" 
-             class="w-full h-full object-cover @(Item.IsSold ? "sold-grayscale" : "transition-transform duration-300 hover:scale-105")" />
+             class="w-full h-full object-cover @(Item.IsSold ? "sold-grayscale" : "transition-transform duration-300 hover:scale-105")"
+             onerror="this.src='https://via.placeholder.com/400x400/e5e7eb/6b7280?text=Sin+Imagen'" />
         
         @if (Item.IsSold)
         {
@@ -44,49 +46,44 @@
     
     <!-- Contenido de la tarjeta -->
     <div class="p-4">
-        <h3 class="font-semibold text-lg @(Item.IsSold ? "text-gray-500" : "text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors") mb-2 line-clamp-2" @onclick="HandleTitleClick">
+        <!-- Título (clickeable) -->
+        <h3 class="font-semibold text-lg text-gray-900 mb-2 line-clamp-2 leading-snug @(Item.IsSold ? "" : "cursor-pointer hover:text-indigo-600 transition-colors")" 
+            @onclick="HandleTitleClick">
             @Item.Title
         </h3>
         
-        <p class="@(Item.IsSold ? "text-gray-400" : "text-gray-600") text-sm mb-3 line-clamp-3">
-            @Item.Description
-        </p>
+        <!-- Precio -->
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-2xl font-bold text-gray-800">$@Item.Price.ToString("F2")</span>
+        </div>
         
-        <div class="flex items-center justify-between">
-            <div class="flex flex-col">
-                <span class="text-2xl font-bold @(Item.IsSold ? "text-gray-400" : "text-gray-800")">
-                    $@Item.Price.ToString("F2")
-                </span>
-            </div>
-            
-            @if (!Item.IsSold)
+        <!-- Botón de acción -->
+        <div class="flex items-center justify-center">
+            @if (Item.IsSold)
             {
-                @if (IsInCart)
-                {
-                    <button @onclick="RemoveFromCart" @onclick:stopPropagation="true"
-                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Quitar
-                    </button>
-                }
-                else
-                {
-                    <button @onclick="AddToCart" @onclick:stopPropagation="true"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"></path>
-                        </svg>
-                        Agregar
-                    </button>
-                }
+                <div class="w-full bg-gray-100 text-gray-500 py-2.5 px-4 rounded-lg font-medium text-center border border-gray-300">
+                    No disponible
+                </div>
+            }
+            else if (IsInCart)
+            {
+                <button @onclick="RemoveFromCart" 
+                        class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Quitar del carrito
+                </button>
             }
             else
             {
-                <span class="text-gray-500 px-4 py-2 border border-gray-300 rounded-lg">
-                    No disponible
-                </span>
+                <button @onclick="AddToCart" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"></path>
+                    </svg>
+                    Agregar al carrito
+                </button>
             }
         </div>
     </div>
@@ -96,12 +93,45 @@
     [Parameter] public Item Item { get; set; } = null!;
     [Parameter] public bool IsHot { get; set; } = false;
     
-    private bool IsInCart => CartService.IsItemInCart(Item.Id);
+    private bool IsInCart = false;
+    private bool hasRendered = false;
+    
+    protected override void OnInitialized()
+    {
+        CartService.OnCartUpdated += OnCartUpdated;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            hasRendered = true;
+            CartService.InitializeAfterRender();
+            await UpdateCartStatus();
+        }
+    }
+    
+    private async Task UpdateCartStatus()
+    {
+        if (hasRendered)
+        {
+            IsInCart = await CartService.IsItemInCartAsync(Item.Id);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    
+    private async void OnCartUpdated()
+    {
+        if (hasRendered)
+        {
+            await UpdateCartStatus();
+        }
+    }
     
     private string GetImagePath()
     {
         // Prioridad: 1) Imagen principal de la colección, 2) ImagePath legacy, 3) placeholder
-        var mainImage = Item.MainImagePath;
+        var mainImage = Item.MainImagePath ?? Item.ImagePath;
         
         if (string.IsNullOrEmpty(mainImage))
             return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=Sin+Imagen";
@@ -113,19 +143,20 @@
         return mainImage;
     }
     
-    private void AddToCart()
+    private async Task AddToCart()
     {
-        if (!Item.IsSold && !IsInCart)
+        if (!Item.IsSold && !IsInCart && hasRendered)
         {
-            CartService.AddToCart(Item);
-            StateHasChanged(); // Actualizar la UI
+            await CartService.AddToCartAsync(Item);
         }
     }
     
-    private void RemoveFromCart()
+    private async Task RemoveFromCart()
     {
-        CartService.RemoveFromCart(Item.Id);
-        StateHasChanged(); // Actualizar la UI
+        if (hasRendered)
+        {
+            await CartService.RemoveFromCartAsync(Item.Id);
+        }
     }
     
     private void GoToDetail()
@@ -147,5 +178,10 @@
         {
             GoToDetail();
         }
+    }
+    
+    public void Dispose()
+    {
+        CartService.OnCartUpdated -= OnCartUpdated;
     }
 } 

@@ -49,7 +49,8 @@
                                 <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
                                     <img src="@GetImagePath(cartItem.Item)" 
                                          alt="@cartItem.Item.Title" 
-                                         class="w-full h-full object-cover" />
+                                         class="w-full h-full object-cover"
+                                         onerror="this.src='https://via.placeholder.com/80x80/e5e7eb/6b7280?text=Sin+Imagen'" />
                                 </div>
                                 
                                 <!-- Información del producto -->
@@ -182,6 +183,7 @@
     private List<CartItem> cartItems = new();
     private PurchaseRequestForm purchaseForm = new();
     private bool isProcessing = false;
+    private bool hasRendered = false;
     
     // Variables para el modal de confirmación
     private bool showDeleteModal = false;
@@ -207,23 +209,43 @@
 
     protected override void OnInitialized()
     {
-        CartService.OnCartUpdated += UpdateCartItems;
-        UpdateCartItems();
+        CartService.OnCartUpdated += OnCartUpdated;
     }
 
-    private void UpdateCartItems()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        cartItems = CartService.GetCartItems();
-        InvokeAsync(StateHasChanged);
+        if (firstRender)
+        {
+            hasRendered = true;
+            CartService.InitializeAfterRender();
+            await UpdateCartItems();
+        }
+    }
+
+    private async void OnCartUpdated()
+    {
+        if (hasRendered)
+        {
+            await UpdateCartItems();
+        }
+    }
+
+    private async Task UpdateCartItems()
+    {
+        if (hasRendered)
+        {
+            cartItems = await CartService.GetCartItemsAsync();
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private string GetImagePath(Item item)
     {
         // Prioridad: 1) Imagen principal de la colección, 2) ImagePath legacy, 3) placeholder
-        var mainImage = item.MainImagePath;
+        var mainImage = item.MainImagePath ?? item.ImagePath;
         
         if (string.IsNullOrEmpty(mainImage))
-            return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=Sin+Imagen";
+            return "https://via.placeholder.com/80x80/e5e7eb/6b7280?text=Sin+Imagen";
             
         if (!mainImage.StartsWith("http") && !mainImage.StartsWith("/"))
             return $"/uploads/{mainImage}";
@@ -237,11 +259,11 @@
         showDeleteModal = true;
     }
 
-    private void ConfirmDelete()
+    private async Task ConfirmDelete()
     {
         if (itemToDelete != null)
         {
-            CartService.RemoveFromCart(itemToDelete.Id);
+            await CartService.RemoveFromCartAsync(itemToDelete.Id);
             showDeleteModal = false;
             itemToDelete = null;
         }
@@ -253,25 +275,25 @@
         itemToDelete = null;
     }
 
-    private void UpdateQuantity(int itemId, int newQuantity)
+    private async Task UpdateQuantity(int itemId, int newQuantity)
     {
         var cartItem = cartItems.FirstOrDefault(c => c.Item.Id == itemId);
         if (cartItem != null)
         {
             if (newQuantity <= 0)
             {
-                CartService.RemoveFromCart(itemId);
+                await CartService.RemoveFromCartAsync(itemId);
             }
             else
             {
-                CartService.UpdateQuantity(itemId, newQuantity);
+                await CartService.UpdateQuantityAsync(itemId, newQuantity);
             }
         }
     }
 
-    private void RemoveFromCart(int itemId)
+    private async Task RemoveFromCart(int itemId)
     {
-        CartService.RemoveFromCart(itemId);
+        await CartService.RemoveFromCartAsync(itemId);
     }
 
     private int GetTotalItems()
@@ -317,7 +339,7 @@
             await PurchaseRequestService.CreatePurchaseRequestAsync(purchaseRequest, purchaseRequestItems);
 
             // Limpiar carrito
-            CartService.ClearCart();
+            await CartService.ClearCartAsync();
 
             // Redirigir a página de confirmación o mostrar mensaje
             Navigation.NavigateTo("/purchase-success");
@@ -336,6 +358,6 @@
 
     public void Dispose()
     {
-        CartService.OnCartUpdated -= UpdateCartItems;
+        CartService.OnCartUpdated -= OnCartUpdated;
     }
 } 

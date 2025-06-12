@@ -28,10 +28,8 @@
         </button>
         
         <!-- Tooltip opcional -->
-        <div class="absolute bottom-full right-0 mb-2 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-            <div class="bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                Ver carrito (@cartCount @(cartCount == 1 ? "producto" : "productos"))
-            </div>
+        <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            Ver carrito
         </div>
     </div>
 }
@@ -40,46 +38,65 @@
     private int cartCount = 0;
     private bool isOnCartPage = false;
     private bool isOnAdminPage = false;
-    
+    private bool hasRendered = false;
+
     protected override void OnInitialized()
     {
-        CartService.OnCartUpdated += UpdateCartCount;
-        Navigation.LocationChanged += OnLocationChanged;
+        CartService.OnCartUpdated += OnCartUpdated;
+        UpdateCurrentPageStatus();
         
-        UpdateCartCount();
-        CheckCurrentPage();
+        // Suscribirse a cambios de navegación
+        Navigation.LocationChanged += OnLocationChanged;
     }
-    
-    private void UpdateCartCount()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        cartCount = CartService.GetCartCount();
-        InvokeAsync(StateHasChanged);
+        if (firstRender)
+        {
+            hasRendered = true;
+            CartService.InitializeAfterRender();
+            await UpdateCartCount();
+        }
     }
-    
+
+    private async void OnCartUpdated()
+    {
+        if (hasRendered)
+        {
+            await UpdateCartCount();
+        }
+    }
+
+    private async Task UpdateCartCount()
+    {
+        if (hasRendered)
+        {
+            cartCount = await CartService.GetCartCountAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        CheckCurrentPage();
-    }
-    
-    private void CheckCurrentPage()
-    {
-        var currentUri = Navigation.Uri;
-        isOnCartPage = currentUri.EndsWith("/cart", StringComparison.OrdinalIgnoreCase);
-        isOnAdminPage = currentUri.Contains("/admin", StringComparison.OrdinalIgnoreCase);
+        UpdateCurrentPageStatus();
         InvokeAsync(StateHasChanged);
     }
-    
-    private async Task GoToCart()
+
+    private void UpdateCurrentPageStatus()
+    {
+        var currentUri = Navigation.Uri;
+        isOnCartPage = currentUri.Contains("/cart");
+        isOnAdminPage = currentUri.Contains("/admin");
+    }
+
+    private void GoToCart()
     {
         Navigation.NavigateTo("/cart");
-        // Hacer scroll al inicio de la página después de navegar
-        await Task.Delay(100); // Pequeña pausa para asegurar que la navegación complete
-        await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
     }
-    
+
     public void Dispose()
     {
-        CartService.OnCartUpdated -= UpdateCartCount;
+        CartService.OnCartUpdated -= OnCartUpdated;
         Navigation.LocationChanged -= OnLocationChanged;
     }
 } 
