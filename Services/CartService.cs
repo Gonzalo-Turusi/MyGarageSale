@@ -91,6 +91,8 @@ public class CartService : ICartService
                 IsSold = dto.IsSold,
                 Stock = dto.Stock,
                 CategoryId = dto.CategoryId,
+                IsNew = dto.IsNew,
+                IsHot = dto.IsHot,
                 CreatedAt = DateTime.UtcNow,
                 Category = dto.CategoryId > 0 ? new Category 
                 { 
@@ -132,6 +134,8 @@ public class CartService : ICartService
                 Stock = ci.Item.Stock,
                 CategoryId = ci.Item.CategoryId,
                 CategoryName = ci.Item.Category?.Name,
+                IsNew = ci.Item.IsNew,
+                IsHot = ci.Item.IsHot,
                 Quantity = ci.Quantity
             }).ToList();
 
@@ -305,6 +309,8 @@ public class CartItemDto
     public int Stock { get; set; }
     public int CategoryId { get; set; }
     public string? CategoryName { get; set; }
+    public bool IsNew { get; set; }
+    public bool IsHot { get; set; }
     public int Quantity { get; set; } = 1;
 }
 

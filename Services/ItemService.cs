@@ -140,6 +140,10 @@ public class ItemService : IItemService
             existingItem.Price = item.Price;
             existingItem.CategoryId = item.CategoryId;
             existingItem.IsSold = item.IsSold;
+            existingItem.IsNew = item.IsNew;
+            existingItem.IsHot = item.IsHot;
+            existingItem.MarketPrice = item.MarketPrice;
+            existingItem.ShowDiscount = item.ShowDiscount;
             existingItem.UpdatedAt = DateTime.UtcNow;
             
             if (!string.IsNullOrEmpty(item.ImagePath))

@@ -46,11 +46,11 @@ public class AppDbContext : DbContext
             
         // Seed data
         modelBuilder.Entity<Category>().HasData(
-            new Category { Id = 1, Name = "Electrónicos", Description = "Dispositivos electrónicos y gadgets" },
-            new Category { Id = 2, Name = "Ropa", Description = "Ropa y accesorios" },
-            new Category { Id = 3, Name = "Hogar", Description = "Artículos para el hogar" },
-            new Category { Id = 4, Name = "Libros", Description = "Libros y revistas" },
-            new Category { Id = 5, Name = "Deportes", Description = "Artículos deportivos" }
+            new Category { Id = 1, Name = "Electrónicos", Description = "Dispositivos electrónicos y gadgets", CreatedAt = new DateTime(2024, 1, 1) },
+            new Category { Id = 2, Name = "Ropa", Description = "Ropa y accesorios", CreatedAt = new DateTime(2024, 1, 1) },
+            new Category { Id = 3, Name = "Hogar", Description = "Artículos para el hogar", CreatedAt = new DateTime(2024, 1, 1) },
+            new Category { Id = 4, Name = "Libros", Description = "Libros y revistas", CreatedAt = new DateTime(2024, 1, 1) },
+            new Category { Id = 5, Name = "Deportes", Description = "Artículos deportivos", CreatedAt = new DateTime(2024, 1, 1) }
         );
     }
 } 

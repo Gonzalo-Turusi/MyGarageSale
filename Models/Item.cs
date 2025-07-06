@@ -31,12 +31,21 @@ public class Item
     // Interested count - increments each time someone requests this item
     public int InterestedCount { get; set; } = 0;
     
+    // Badges configurables
+    public bool IsNew { get; set; } = false;
+    public bool IsHot { get; set; } = false;
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? UpdatedAt { get; set; }
     
     // Foreign key
     public int CategoryId { get; set; }
+    
+    // Market price (brand new)
+    public decimal? MarketPrice { get; set; }
+    // Show discount
+    public bool ShowDiscount { get; set; } = false;
     
     // Navigation properties
     public virtual Category Category { get; set; } = null!;
