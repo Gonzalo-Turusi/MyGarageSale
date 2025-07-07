@@ -308,7 +308,7 @@ else
 - 🔗 [Tailwind CSS](https://tailwindcss.com/docs)
 
 ### **Tools Recomendadas**
-- **IDE**: Visual Studio 2022 / VS Code
+- **IDE**: Visual Studio 2022 / VS Code / Cursor
 - **Database**: Azure Data Studio
 - **API Testing**: Postman / Thunder Client
 - **Performance**: dotnet-trace
