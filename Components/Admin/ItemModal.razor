@@ -1,0 +1,473 @@
+@using Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using MyGarageSale.Services
+
+@inherits OwningComponentBase
+
+@inject MyGarageSale.Services.IItemService ItemService
+
+@if (Visible)
+{
+    <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50 p-2">
+        <div class="bg-white rounded-2xl shadow-xl w-[98vw] max-w-5xl max-h-screen flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-blue-600 px-6 py-4 text-white rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-bold">
+                            @(IsEdit ? "Editar Artículo" : "Nuevo Artículo")
+                        </h3>
+                        <p class="text-blue-100 text-sm mt-1">
+                            @(IsEdit ? "Modifica los detalles del artículo" : "Agrega un nuevo producto a tu inventario")
+                        </p>
+                    </div>
+                    <button @onclick="CerrarModal" class="text-blue-100 hover:text-white p-2 hover:bg-blue-700 rounded-lg transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-6">
+                @if (Item != null)
+                {
+                    <EditForm Model="@Item" OnValidSubmit="GuardarArticulo" FormName="AdminItemForm">
+                        <DataAnnotationsValidator />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Precio de venta</label>
+                                <InputNumber @bind-Value="Item.Price"
+                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                             placeholder="Ej: 100.00" />
+                                <ValidationMessage For="@(() => Item.Price)" class="text-red-500 text-sm mt-1 font-medium" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Precio de mercado</label>
+                                <InputNumber @bind-Value="Item.MarketPrice"
+                                             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                                             placeholder="Ej: 200.00" />
+                                <ValidationMessage For="@(() => Item.MarketPrice)" class="text-red-500 text-sm mt-1 font-medium" />
+                            </div>
+                        </div>
+                        <div class="flex items-center p-4 bg-yellow-50 rounded-xl mt-2">
+                            <InputCheckbox @bind-Value="Item.ShowDiscount"
+                                           class="h-5 w-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500" />
+                            <label class="ml-3 text-sm font-medium text-gray-700">Mostrar descuento en la card</label>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Columna Izquierda -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Título del Artículo</label>
+                                    <InputText @bind-Value="Item.Title" 
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                               placeholder="Ej: iPhone 12 Pro - Usado" />
+                                    <ValidationMessage For="@(() => Item.Title)" class="text-red-500 text-sm mt-1 font-medium" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+                                    <InputSelect @bind-Value="Item.CategoryId" 
+                                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                                        <option value="">Selecciona una categoría</option>
+                                        @foreach (var category in Categories)
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => Item.CategoryId)" class="text-red-500 text-sm mt-1 font-medium" />
+                                </div>
+                                <div class="flex items-center p-4 bg-gray-50 rounded-xl">
+                                    <InputCheckbox @bind-Value="Item.IsSold" 
+                                                   class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                    <label class="ml-3 text-sm font-medium text-gray-700">Marcar como vendido</label>
+                                </div>
+                                <!-- Badges configurables -->
+                                <div class="space-y-3">
+                                    <h4 class="text-sm font-semibold text-gray-700">Badges del artículo</h4>
+                                    <!-- Badge NEW -->
+                                    <div class="flex items-center p-3 bg-red-50 rounded-lg border border-red-200">
+                                        <InputCheckbox @bind-Value="Item.IsNew" 
+                                                       class="h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500" />
+                                        <label class="ml-3 text-sm font-medium text-gray-700">Badge "NEW" (rojo)</label>
+                                    </div>
+                                    <!-- Badge HOT -->
+                                    <div class="flex items-center p-3 bg-pink-50 rounded-lg border border-pink-200">
+                                        <InputCheckbox @bind-Value="Item.IsHot" 
+                                                       class="h-5 w-5 text-pink-600 border-gray-300 rounded focus:ring-pink-500" />
+                                        <label class="ml-3 text-sm font-medium text-gray-700">Badge "HOT" (rosa con animación)</label>
+                                    </div>
+                                    @if (Item.IsNew && Item.IsHot)
+                                    {
+                                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <p class="text-xs text-yellow-800 font-medium">
+                                                ⚠️ Nota: Si ambos badges están activos, solo se mostrará el badge "NEW" en el catálogo.
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <!-- Columna Derecha -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                                    <InputTextArea @bind-Value="Item.Description" 
+                                                   rows="4"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                                   placeholder="Describe el estado, características y detalles del artículo..." />
+                                    <ValidationMessage For="@(() => Item.Description)" class="text-red-500 text-sm mt-1 font-medium" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Imágenes del Artículo</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors mb-4">
+                                        <InputFile OnChange="@HandleMultipleImageUpload" accept="image/*" multiple class="hidden" id="multipleImageUpload" />
+                                        <label for="multipleImageUpload" class="cursor-pointer">
+                                            <div class="space-y-4">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <div>
+                                                    <p class="text-gray-600 font-medium">Haz clic para subir imágenes</p>
+                                                    <p class="text-sm text-gray-500">PNG, JPG hasta 5MB cada una</p>
+                                                    <p class="text-xs text-gray-400">Puedes seleccionar múltiples imágenes a la vez (máximo 10)</p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @if (tempImages.Any())
+                                    {
+                                        <div class="space-y-3">
+                                            <p class="text-sm font-medium text-gray-700">Imágenes del artículo:</p>
+                                            <div class="space-y-2">
+                                                @for (int i = 0; i < tempImages.Count; i++)
+                                                {
+                                                    var index = i;
+                                                    var tempImage = tempImages[i];
+                                                    <div class="flex items-center bg-white rounded-lg p-2 border hover:border-blue-300 transition-colors"
+                                                         draggable="true"
+                                                         @ondragstart="() => OnDragStart(index)"
+                                                         @ondragover="OnDragOver"
+                                                         @ondragover:preventDefault="true"
+                                                         @ondrop="() => OnDrop(index)"
+                                                         @ondrop:preventDefault="true"
+                                                         @ondragenter:preventDefault="true">
+                                                        <div class="w-6 h-16 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-move transition-colors"
+                                                             title="Arrastra para reordenar"
+                                                             @onmousedown="() => OnDragStart(index)">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="relative group ml-3">
+                                                            <img src="@tempImage.Path" alt="@(tempImage.AltText ?? "")" class="h-16 w-20 object-cover rounded-lg shadow-sm" />
+                                                            <div class="absolute top-1 left-1">
+                                                                @if (index == 0)
+                                                                {
+                                                                    <span class="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded font-medium">Principal</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="bg-gray-500 text-white text-xs px-1.5 py-0.5 rounded font-medium">@(index + 1)</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-1 ml-3">
+                                                            <p class="text-sm font-medium text-gray-700">
+                                                                @if (index == 0) { <span class="text-blue-600">Imagen principal</span> } 
+                                                                else { <span>Imagen @(index + 1)</span> }
+                                                            </p>
+                                                            <p class="text-xs text-gray-500">@(!string.IsNullOrEmpty(tempImage.AltText) ? tempImage.AltText : "Sin descripción")</p>
+                                                        </div>
+                                                        <div class="flex space-x-1">
+                                                            @if (index > 0)
+                                                            {
+                                                                <button type="button" @onclick="() => MoveImageUp(index)"
+                                                                        class="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5" title="Mover arriba">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                                                    </svg>
+                                                                </button>
+                                                            }
+                                                            @if (index < tempImages.Count - 1)
+                                                            {
+                                                                <button type="button" @onclick="() => MoveImageDown(index)"
+                                                                        class="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5" title="Mover abajo">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                                    </svg>
+                                                                </button>
+                                                            }
+                                                            <button type="button" @onclick="() => RemoveImage(index)"
+                                                                    class="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5" title="Eliminar">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <p class="text-xs text-gray-500 flex items-center">
+                                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                                </svg>
+                                                Arrastra desde las 3 rayitas para reordenar, o usa las flechas ↑↓ para mover una posición.
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+                            <button type="button" @onclick="CerrarModal" 
+                                    class="px-6 py-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                    disabled="@IsSaving"
+                                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-all duration-200">
+                                @if (IsSaving)
+                                {
+                                    <span class="flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Guardando...
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>Guardar Artículo</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Item? Item { get; set; }
+    [Parameter] public List<Category> Categories { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public bool IsSaving { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private IImageUploadService ImageUploadService { get; set; } = default!;
+    
+    private List<TempImage> tempImages = new();
+    private int dragStartIndex = -1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Visible && Item != null)
+        {
+            // Cargar imágenes existentes al abrir el modal
+            tempImages.Clear();
+            if (Item?.Images?.Any() == true)
+            {
+                tempImages = Item.Images.OrderBy(i => i.Order)
+                    .Select(i => new TempImage { Path = i.ImagePath, AltText = i.AltText ?? "", Order = i.Order })
+                    .ToList();
+            }
+            else if (!string.IsNullOrEmpty(Item?.ImagePath))
+            {
+                tempImages.Add(new TempImage
+                {
+                    Path = Item.ImagePath,
+                    AltText = "Imagen principal",
+                    Order = 0
+                });
+            }
+            // Desactivar scroll del body cuando el modal está abierto
+            await JSRuntime.InvokeVoidAsync("document.body.classList.add", "overflow-hidden");
+        }
+        else
+        {
+            // Reactivar scroll del body cuando el modal se cierra
+            await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "overflow-hidden");
+        }
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        // Asegurar que el scroll se reactive al destruir el componente
+        await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "overflow-hidden");
+    }
+
+    private async Task HandleMultipleImageUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var files = e.GetMultipleFiles(10); // Permitir hasta 10 imágenes
+            if (files.Any())
+            {
+                foreach (var file in files)
+                {
+                    // Validar tipo de archivo
+                    if (!file.ContentType.StartsWith("image/"))
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", $"El archivo {file.Name} no es una imagen válida.");
+                        continue;
+                    }
+
+                    // Validar tamaño (5MB max)
+                    if (file.Size > 5 * 1024 * 1024)
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", $"El archivo {file.Name} es muy grande. Máximo 5MB.");
+                        continue;
+                    }
+
+                    try
+                    {
+                        // Usar el servicio de upload (Imgur o local)
+                        using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+                        var imageUrl = await ImageUploadService.UploadImageAsync(stream, file.Name);
+                        tempImages.Add(new TempImage
+                        {
+                            Path = imageUrl,
+                            AltText = Path.GetFileNameWithoutExtension(file.Name),
+                            Order = tempImages.Count
+                        });
+                        await JSRuntime.InvokeVoidAsync("console.log", $"✅ Imagen subida: {imageUrl}");
+                    }
+                    catch (Exception uploadEx)
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", $"Error subiendo {file.Name}: {uploadEx.Message}");
+                        continue;
+                    }
+                }
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al procesar imágenes: {ex.Message}");
+        }
+    }
+
+    private void MoveImageUp(int index)
+    {
+        if (index > 0 && index < tempImages.Count)
+        {
+            var temp = tempImages[index];
+            tempImages[index] = tempImages[index - 1];
+            tempImages[index - 1] = temp;
+            for (int i = 0; i < tempImages.Count; i++)
+                tempImages[i].Order = i;
+            StateHasChanged();
+        }
+    }
+    private void MoveImageDown(int index)
+    {
+        if (index >= 0 && index < tempImages.Count - 1)
+        {
+            var temp = tempImages[index];
+            tempImages[index] = tempImages[index + 1];
+            tempImages[index + 1] = temp;
+            for (int i = 0; i < tempImages.Count; i++)
+                tempImages[i].Order = i;
+            StateHasChanged();
+        }
+    }
+    private void RemoveImage(int index)
+    {
+        if (index >= 0 && index < tempImages.Count)
+        {
+            tempImages.RemoveAt(index);
+            for (int i = 0; i < tempImages.Count; i++)
+                tempImages[i].Order = i;
+            StateHasChanged();
+        }
+    }
+    private void OnDragStart(int index) => dragStartIndex = index;
+    private void OnDragOver(DragEventArgs e) => e.DataTransfer.DropEffect = "move";
+    private void OnDrop(int index)
+    {
+        if (dragStartIndex >= 0 && dragStartIndex != index && dragStartIndex < tempImages.Count && index < tempImages.Count)
+        {
+            var draggedImage = tempImages[dragStartIndex];
+            tempImages.RemoveAt(dragStartIndex);
+            tempImages.Insert(index, draggedImage);
+            for (int i = 0; i < tempImages.Count; i++)
+                tempImages[i].Order = i;
+            StateHasChanged();
+        }
+        dragStartIndex = -1;
+    }
+
+    private void LimpiarModal()
+    {
+        tempImages.Clear();
+        // Si quieres limpiar más estado, hazlo aquí
+    }
+
+    private async Task GuardarArticulo()
+    {
+        try
+        {
+            IsSaving = true;
+            if (tempImages.Any())
+            {
+                Item!.ImagePath = tempImages.First().Path;
+            }
+            Item savedItem;
+            if (Item!.Id > 0)
+            {
+                savedItem = await ItemService.UpdateItemAsync(Item);
+            }
+            else
+            {
+                savedItem = await ItemService.CreateItemAsync(Item);
+            }
+            if (tempImages.Any())
+            {
+                var itemImages = tempImages.Select(tempImg => new Models.ItemImage
+                {
+                    ImagePath = tempImg.Path,
+                    AltText = tempImg.AltText,
+                    Order = tempImg.Order,
+                    ItemId = savedItem.Id
+                }).ToList();
+                await ItemService.SaveItemImagesAsync(savedItem.Id, itemImages);
+            }
+            await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "overflow-hidden");
+            LimpiarModal();
+            if (OnSave.HasDelegate)
+                await OnSave.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al guardar: {ex.Message}");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async void CerrarModal()
+    {
+        LimpiarModal();
+        await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "overflow-hidden");
+        if (OnClose.HasDelegate)
+            await OnClose.InvokeAsync();
+    }
+
+    public class TempImage
+    {
+        public string Path { get; set; } = string.Empty;
+        public string AltText { get; set; } = string.Empty;
+        public int Order { get; set; }
+    }
+} 

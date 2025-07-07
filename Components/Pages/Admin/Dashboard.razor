@@ -1,8 +1,11 @@
 @page "/admin/dashboard"
 @using MyGarageSale.Services
+@using MyGarageSale.Models
+@using Microsoft.AspNetCore.Components.Forms
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
-@inject IJSRuntime JSRuntime
+@inject ICategoryService CategoryService
+@inject IItemService ItemService
 @rendermode InteractiveServer
 
 <PageTitle>Dashboard Admin - MyGarageSale</PageTitle>
@@ -117,7 +120,7 @@ else
                 @switch (activeTab)
                 {
                     case AdminTab.Items:
-                        <AdminItems />
+                        <AdminItems @ref="adminItemsRef" OnRequestEdit="OpenModal" />
                         break;
                     case AdminTab.Categories:
                         <AdminCategories />
@@ -128,6 +131,17 @@ else
                 }
             </div>
         </main>
+
+        @if (showModal)
+        {
+            <ItemModal 
+                Visible="@showModal"
+                Item="@editingItem"
+                Categories="@allCategories"
+                IsEdit="@(editingItem?.Id > 0)"
+                OnClose="EventCallback.Factory.Create(this, CloseModal)"
+                OnSave="EventCallback.Factory.Create(this, SaveItem)" />
+        }
     </div>
 }
 
@@ -135,6 +149,14 @@ else
     private bool isAuthenticated = false;
     private bool authChecked = false;
     private AdminTab activeTab = AdminTab.Items;
+    
+    // Estado del modal
+    private bool showModal = false;
+    private Item editingItem = new();
+    private List<Category> allCategories = new();
+    
+    // Referencia al componente AdminItems para refrescar la lista
+    private AdminItems? adminItemsRef;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -146,6 +168,11 @@ else
             if (!isAuthenticated)
             {
                 Navigation.NavigateTo("/admin/login");
+            }
+            else
+            {
+                // Cargar categorías para el modal
+                allCategories = await CategoryService.GetAllCategoriesAsync();
             }
             
             StateHasChanged();
@@ -183,5 +210,43 @@ else
         Items,
         Categories,
         Requests
+    }
+
+    // Métodos del modal
+    private async Task OpenModal(Item item)
+    {
+        // Si es edición, obtener el item completo del backend
+        if (item.Id > 0)
+        {
+            var itemCompleto = await ItemService.GetItemByIdAsync(item.Id);
+            if (itemCompleto != null)
+                editingItem = itemCompleto;
+            else
+                editingItem = item;
+        }
+        else
+        {
+            editingItem = new Item();
+        }
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        editingItem = new Item();
+    }
+
+    private async Task SaveItem()
+    {
+        // El guardado se maneja en el modal ItemModal.razor
+        // Este método se llama cuando se completa el guardado exitosamente
+        CloseModal();
+        
+        // Refrescar la lista de artículos después de guardar
+        if (adminItemsRef != null)
+        {
+            await adminItemsRef.RefreshData();
+        }
     }
 } 
