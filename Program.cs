@@ -66,11 +66,25 @@ builder.Services.AddScoped<IImageUploadService>(serviceProvider =>
 
 var app = builder.Build();
 
-// Ensure database is created and seed sample data
+// Ensure database is created, migrations applied, and seed sample data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
+    
+    // Apply any pending migrations safely (this won't delete data)
+    try
+    {
+        context.Database.Migrate();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("✅ Migraciones aplicadas exitosamente");
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "❌ Error aplicando migraciones: {Message}", ex.Message);
+        // Fallback: ensure database exists
+        context.Database.EnsureCreated();
+    }
     
     // Seed sample items if none exist
     var seedService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();

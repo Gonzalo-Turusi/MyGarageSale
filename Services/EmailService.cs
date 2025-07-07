@@ -238,8 +238,8 @@ public class EmailService : IEmailService
             }
             sb.AppendLine($"</td>");
             sb.AppendLine($"<td style='padding: 12px 15px; text-align: center; border-bottom: 1px solid #dee2e6; font-weight: 600;'>{purchaseRequestItem.Quantity}</td>");
-            sb.AppendLine($"<td style='padding: 12px 15px; text-align: right; border-bottom: 1px solid #dee2e6;'>${purchaseRequestItem.Item.Price:F2}</td>");
-            sb.AppendLine($"<td style='padding: 12px 15px; text-align: right; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #28a745;'>${subtotal:F2}</td>");
+            sb.AppendLine($"<td style='padding: 12px 15px; text-align: right; border-bottom: 1px solid #dee2e6;'>${purchaseRequestItem.Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}</td>");
+            sb.AppendLine($"<td style='padding: 12px 15px; text-align: right; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #28a745;'>${subtotal.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}</td>");
             sb.AppendLine($"</tr>");
             isEven = !isEven;
         }
@@ -247,7 +247,7 @@ public class EmailService : IEmailService
         // Total
         sb.AppendLine("<tr style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;'>");
         sb.AppendLine("<td colspan='3' style='padding: 15px; text-align: right; font-weight: 700; font-size: 16px;'>TOTAL DEL PEDIDO:</td>");
-        sb.AppendLine($"<td style='padding: 15px; text-align: right; font-weight: 700; font-size: 20px;'>${total:F2}</td>");
+        sb.AppendLine($"<td style='padding: 15px; text-align: right; font-weight: 700; font-size: 20px;'>${total.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}</td>");
         sb.AppendLine("</tr>");
         sb.AppendLine("</tbody>");
         sb.AppendLine("</table>");
@@ -317,15 +317,15 @@ public class EmailService : IEmailService
             sb.AppendLine("<tr>");
             sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px;'>{item.Item.Title}</td>");
             sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: center;'>{item.Quantity}</td>");
-            sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: right;'>${item.Item.Price:F2}</td>");
-            sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: right;'>${subtotal:F2}</td>");
+            sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: right;'>${item.Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}</td>");
+            sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: right;'>${subtotal.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}</td>");
             sb.AppendLine("</tr>");
         }
         
         // Total
         sb.AppendLine("<tr style='background-color: #f8f9fa; font-weight: bold;'>");
         sb.AppendLine("<td colspan='3' style='border: 1px solid #dee2e6; padding: 12px; text-align: right;'>TOTAL:</td>");
-        sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: right; color: #28a745; font-size: 18px;'>${total:F2}</td>");
+        sb.AppendLine($"<td style='border: 1px solid #dee2e6; padding: 12px; text-align: right; color: #28a745; font-size: 18px;'>${total.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}</td>");
         sb.AppendLine("</tr>");
         sb.AppendLine("</tbody>");
         sb.AppendLine("</table>");
@@ -390,13 +390,13 @@ public class EmailService : IEmailService
             
             sb.AppendLine($"• {item.Item.Title}");
             sb.AppendLine($"  Categoría: {item.Item.Category?.Name}");
-            sb.AppendLine($"  Precio: ${item.Item.Price:F2}");
+            sb.AppendLine($"  Precio: ${item.Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}");
             sb.AppendLine($"  Cantidad: {item.Quantity}");
-            sb.AppendLine($"  Subtotal: ${subtotal:F2}");
+            sb.AppendLine($"  Subtotal: ${subtotal.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}");
             sb.AppendLine();
         }
         
-        sb.AppendLine($"💰 TOTAL DEL PEDIDO: ${total:F2}");
+        sb.AppendLine($"💰 TOTAL DEL PEDIDO: ${total.ToString("N0", new System.Globalization.CultureInfo("es-AR"))}");
         sb.AppendLine();
         sb.AppendLine("📝 PRÓXIMOS PASOS:");
         sb.AppendLine("- Contactar al cliente para coordinar pago y entrega");

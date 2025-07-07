@@ -111,7 +111,7 @@
                                         <!-- Total de la solicitud -->
                                         <div class="mt-2">
                                             <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-green-100 text-green-800">
-                                                Total: $@GetRequestTotal(request).ToString("N0")
+                                                Total: $@GetRequestTotal(request).ToString("N0", new System.Globalization.CultureInfo("es-AR"))
                                             </span>
                                         </div>
                                     </div>
@@ -205,7 +205,7 @@
                                                 
                                                 <div class="flex-1 min-w-0">
                                                     <p class="font-semibold text-gray-900 text-xs sm:text-sm truncate">@requestItem.Item.Title</p>
-                                                    <p class="text-green-600 font-bold text-xs sm:text-sm">$@requestItem.Item.Price.ToString("N0")</p>
+                                                    <p class="text-green-600 font-bold text-xs sm:text-sm">$@requestItem.Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))</p>
                                                     @if (requestItem.Quantity > 1)
                                                     {
                                                         <p class="text-xs text-gray-500">Cantidad: @requestItem.Quantity</p>

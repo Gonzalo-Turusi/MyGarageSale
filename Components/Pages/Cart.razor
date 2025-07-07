@@ -57,7 +57,7 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-medium text-gray-900 truncate">@cartItem.Item.Title</h3>
                                     <p class="text-sm text-gray-500 truncate">@cartItem.Item.Category?.Name</p>
-                                    <p class="text-lg font-semibold text-gray-800">$@cartItem.Item.Price.ToString("F2")</p>
+                                    <p class="text-lg font-semibold text-gray-800">$@cartItem.Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))</p>
                                 </div>
                                 
                                 <!-- Controles de cantidad y eliminación -->
@@ -91,7 +91,7 @@
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-sm">
                             <span>Subtotal (@GetTotalItems() artículos):</span>
-                            <span>$@GetSubtotal().ToString("F2")</span>
+                            <span>$@GetSubtotal().ToString("N0", new System.Globalization.CultureInfo("es-AR"))</span>
                         </div>
                         <div class="flex justify-between text-sm text-gray-600">
                             <span>Envío:</span>
@@ -100,7 +100,7 @@
                         <div class="border-t pt-3">
                             <div class="flex justify-between font-semibold text-lg">
                                 <span>Total:</span>
-                                <span class="text-gray-800">$@GetSubtotal().ToString("F2")</span>
+                                <span class="text-gray-800">$@GetSubtotal().ToString("N0", new System.Globalization.CultureInfo("es-AR"))</span>
                             </div>
                         </div>
                     </div>

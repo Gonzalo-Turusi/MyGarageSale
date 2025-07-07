@@ -67,8 +67,8 @@
             @if (Item.ShowDiscount && Item.MarketPrice.HasValue && Item.MarketPrice.Value > Item.Price)
             {
                 <div class="flex items-center gap-2">
-                    <span class="text-lg font-semibold text-gray-400 line-through !line-through">$@Item.MarketPrice.Value.ToString("F2")</span>
-                    <span class="text-2xl font-bold text-gray-900">$@Item.Price.ToString("F2")</span>
+                    <span class="text-lg font-semibold text-gray-400 line-through !line-through">$@Item.MarketPrice.Value.ToString("N0", new System.Globalization.CultureInfo("es-AR"))</span>
+                    <span class="text-2xl font-bold text-gray-900">$@Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))</span>
                     <span class="inline-flex px-2 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700 border border-red-200 ml-1">
                         @((int)Math.Round((Item.MarketPrice.Value - Item.Price) / Item.MarketPrice.Value * 100))% OFF
                     </span>
@@ -76,7 +76,7 @@
             }
             else
             {
-                <span class="text-2xl font-bold text-gray-900">$@Item.Price.ToString("F2")</span>
+                <span class="text-2xl font-bold text-gray-900">$@Item.Price.ToString("N0", new System.Globalization.CultureInfo("es-AR"))</span>
             }
         </div>
         
