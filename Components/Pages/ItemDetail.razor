@@ -214,6 +214,7 @@ else
             if (item != null && hasRendered)
             {
                 await UpdateCartStatus();
+                await ScrollToTop();
             }
         }
         catch (Exception ex)
@@ -225,6 +226,18 @@ else
         {
             isLoading = false;
             await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ScrollToTop()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error scrolling to top: {ex.Message}");
         }
     }
 
